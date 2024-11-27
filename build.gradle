@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'io.github.oscar0812'
-version = '1.0.4'
+version = '1.0.5'
 
 java {
     toolchain {
@@ -43,15 +43,23 @@ publishing {
             from components.java
             groupId = 'io.github.oscar0812'
             artifactId = 'JDSXTool'
-            version = '1.0.4'
+            version = '1.0.5'
 
+            // Add main JAR artifact (the build output)
             // artifact file('build/libs/JDSXTool-1.0.3.jar')
-            artifact fileTree(dir: 'lib', include: ['*.jar'])
+
+            // Add all JARs from 'lib' folder as separate artifacts with unique classifiers
+            fileTree(dir: 'lib', include: ['*.jar']).each { jarFile ->
+                // Use the filename (without extension) as classifier to avoid conflicts
+                artifact jarFile, {
+                    classifier jarFile.name.replaceFirst(/\.jar$/, '') // Create a classifier based on the filename
+                }
+            }
         }
     }
 
     repositories {
-        mavenLocal()
-        maven { url 'https://jitpack.io' }
+        mavenLocal() // For local testing
+        maven { url 'https://jitpack.io' } // Push to JitPack
     }
 }
