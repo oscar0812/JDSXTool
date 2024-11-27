@@ -1,8 +1,3 @@
-Main.java
-output_java
-output.dex
-output.jar
-
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

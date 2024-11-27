@@ -12,27 +12,42 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+/**
+ * Utility class for operations related to Java files, such as compiling Java code into .class files,
+ * converting Java code into Smali code, and extracting class names from Java code.
+ */
 public class Java {
 
-    public static File[] compileJavaToClass(File javaFile, File tempDir) throws IOException {
+    /**
+     * Compiles a given Java file into .class files and stores them in a specified temporary directory.
+     *
+     * @param javaFile the path to the Java source file to be compiled
+     * @param tempDir the directory to store the compiled .class files
+     * @return an array of paths to the generated .class files
+     * @throws IOException if an I/O error occurs during compilation or file management
+     * @throws IllegalStateException if the Java compiler is not available
+     */
+    public static Path[] compileJavaToClass(Path javaFile, Path tempDir) throws IOException {
+        Utils.validateFilePath(javaFile, "Java path");
+
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         if (compiler == null) {
             throw new IllegalStateException("Java Compiler not available. Ensure you are running with a JDK.");
         }
 
         // Create a subfolder for the compiled .class files
-        File classOutputDir = new File(tempDir, "compiled_classes");
-        if (!classOutputDir.exists() && !classOutputDir.mkdirs()) {
-            throw new IOException("Failed to create directory for compiled classes");
+        Path classOutputDir = tempDir.resolve("compiled_classes");
+        if (Files.notExists(classOutputDir)) {
+            Files.createDirectories(classOutputDir);
         }
 
-        // Set up the file manager to use the subfolder
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-        fileManager.setLocation(javax.tools.StandardLocation.CLASS_OUTPUT, List.of(classOutputDir));
+        fileManager.setLocation(javax.tools.StandardLocation.CLASS_OUTPUT, List.of(classOutputDir.toFile()));
 
-        // Compile the Java file
-        Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(Collections.singletonList(javaFile));
+        Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromPaths(Collections.singletonList(javaFile));
         boolean success = compiler.getTask(null, fileManager, null, null, null, compilationUnits).call();
 
         fileManager.close();
@@ -42,15 +57,32 @@ public class Java {
         }
 
         // Retrieve all .class files in the subfolder
-        File[] classFiles = classOutputDir.listFiles((dir, name) -> name.endsWith(".class"));
-        if (classFiles == null || classFiles.length == 0) {
-            throw new IOException("No .class files were generated");
-        }
+        try (Stream<Path> classFilesStream = Files.walk(classOutputDir)) {
+            List<Path> classFiles = classFilesStream
+                    .filter(path -> path.toString().endsWith(".class"))
+                    .toList();
 
-        return classFiles;
+            if (classFiles.isEmpty()) {
+                throw new IOException("No .class files were generated");
+            }
+
+            return classFiles.toArray(new Path[0]);
+        }
     }
 
+    /**
+     * Converts Java code into Smali code by first compiling the Java code to .class files,
+     * converting the class files into a .dex file, and then converting the .dex file to Smali.
+     *
+     * @param javaCode the Java code to be converted
+     * @return an array of paths to the generated Smali files
+     * @throws Exception if any error occurs during the conversion process
+     */
     public static Path[] convertJavaToSmali(String javaCode) throws Exception {
+        if (javaCode == null || javaCode.trim().isEmpty()) {
+            throw new IllegalArgumentException("Provided Java code is null or empty");
+        }
+
         String className = extractClassName(javaCode);
         if (className == null || className.isEmpty()) {
             throw new IllegalArgumentException("Failed to determine class name from the provided Java code");
@@ -61,25 +93,31 @@ public class Java {
         Path tempJavaFile = tempDir.resolve(className + ".java");
         Files.write(tempJavaFile, javaCode.getBytes());
 
-        File[] classFiles = compileJavaToClass(tempJavaFile.toFile(), tempDir.toFile());
+        Path[] classFiles = compileJavaToClass(tempJavaFile, tempDir);
 
         String[] classFilePaths = new String[classFiles.length];
         for (int i = 0; i < classFiles.length; i++) {
             classFilePaths[i] = classFiles[i].toString();
         }
 
-        String outputDexPath = tempDir.resolve("Temp.dex").toString();
+        Path outputDexPath = tempDir.resolve("Temp.dex");
         Dex.convertClassFilesToDex(classFilePaths, outputDexPath);
 
         Path smaliSubDir = tempDir.resolve("smali");
         Files.createDirectories(smaliSubDir);
 
-        Dex.convertDexToSmali(outputDexPath, smaliSubDir.toString());
+        Dex.convertDexToSmali(outputDexPath, smaliSubDir);
 
         return Utils.getFiles(smaliSubDir, "smali");
     }
 
-    private static String extractClassName(String javaCode) {
+    /**
+     * Extracts the class name from a given Java code string using regular expressions.
+     *
+     * @param javaCode the Java code from which to extract the class name
+     * @return the extracted class name, or null if no class name is found
+     */
+    public static String extractClassName(String javaCode) {
         // Use a regular expression to find the class name
         Pattern pattern = Pattern.compile("public\\s+class\\s+(\\w+)");
         Matcher matcher = pattern.matcher(javaCode);
