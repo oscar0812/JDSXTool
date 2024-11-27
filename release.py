@@ -22,7 +22,7 @@ try:
     subprocess.run(["git", "add", "."], check=True)
 
     commit_message = f"Release version {new_version}"
-    subprocess.run(["git", "commit", "-m", commit_message], check=True)
+    subprocess.run(["git", "commit", "-m", commit_message])
 
     subprocess.run(["git", "tag", new_version], check=True)
 
