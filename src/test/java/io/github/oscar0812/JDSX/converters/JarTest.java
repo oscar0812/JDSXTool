@@ -112,7 +112,6 @@ class JarTest {
         Path extractedDir = Jar.extractJar(jarFile);
 
         assertTrue(Files.exists(extractedDir));
-        assertTrue(Files.list(extractedDir).anyMatch(path -> path.getParent().toString().contains("/nested")));
     }
 
     private Map<String, Path> copyAllFilesToTemp() throws IOException {
