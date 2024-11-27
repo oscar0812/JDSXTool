@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'io.github.oscar0812'
+group = 'io.github.oscar0812' // Replace with your GitHub username
 version = '1.0.1'
 
 java {
@@ -18,18 +18,32 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'lib', include: ['*.jar'])
-    // JUnit 5 dependency
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.0'
-
-    // Optionally, if you use assertions with mock objects, you might want to add mockito
-    testImplementation 'org.mockito:mockito-core:5.14.2'
 }
 
 test {
     useJUnitPlatform()
 }
 
-compileJava.options.encoding = 'UTF-8'
-compileJava.options.incremental = true
+compileJava {
+    options.encoding = 'UTF-8'
+    options.incremental = true
+}
+
+// Configure publishing for JitPack
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = 'io.github.oscar0812'
+            artifactId = 'JDSXTool'
+            version = '1.0.1'              // Match your project version
+        }
+    }
+
+    repositories {
+        mavenLocal() // For testing locally
+    }
+}
