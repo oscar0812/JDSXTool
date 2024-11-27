@@ -24,7 +24,7 @@ print(f"All instances of version updated to {new_version}.")
 
 # Git commit and tag commands
 try:
-    subprocess.run(["git", "add", "build.gradle"], check=True)
+    subprocess.run(["git", "add", "."], check=True)
     commit_message = f"Release version {new_version}"
     subprocess.run(["git", "commit", "-m", commit_message], check=True)
 
