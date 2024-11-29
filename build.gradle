@@ -1,10 +1,11 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'io.github.oscar0812'
-version = '1.0.6'
+version = '1.0.7'
 
 java {
     toolchain {
@@ -28,31 +29,36 @@ test {
     useJUnitPlatform()
 }
 
+configurations {
+    shadowRuntime {
+        canBeResolved = true
+        canBeConsumed = false
+        extendsFrom implementation
+    }
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    mergeServiceFiles()
+    configurations = [project.configurations.shadowRuntime]
+    from fileTree(dir: 'lib', include: ['*.jar'])
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            from components.java
+            artifact shadowJar
             groupId = 'io.github.oscar0812'
             artifactId = 'JDSXTool'
-            version = '1.0.6'
-
-            pom {
-                withXml {
-                    def dependenciesNode = asNode().appendNode('dependencies')
-                    fileTree(dir: 'lib', include: ['*.jar']).each { jarFile ->
-                        def dependencyNode = dependenciesNode.appendNode('dependency')
-                        dependencyNode.appendNode('groupId', 'io.github.oscar0812.lib') // Customize if needed
-                        dependencyNode.appendNode('artifactId', jarFile.name.replaceFirst(/\.jar$/, ''))
-                        dependencyNode.appendNode('version', '1.0.0') // Replace with an appropriate version
-                        dependencyNode.appendNode('scope', 'runtime')
-                    }
-                }
-            }
+            version = '1.0.7'
         }
     }
-
     repositories {
-        mavenLocal() // For local testing
-        maven { url 'https://jitpack.io' } // Push to JitPack
+        mavenLocal()
+        maven { url 'https://jitpack.io' }
     }
+}
+
+tasks.jar {
+    enabled = false
 }
