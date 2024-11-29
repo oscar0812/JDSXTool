@@ -16,13 +16,13 @@ content = re.sub(r"version\s*=\s*'.*'", f"version = '{new_version}'", content)
 with open("build.gradle", "w") as file:
     file.write(content)
 
-print(f"Version in build.gradle updated to {new_version}.")
+print(f"All instances of version updated to {new_version}.")
 
 try:
     with open("gradle.properties", "r") as file:
         properties_content = file.read()
 
-    properties_content = re.sub(r"^version\s*=\s*'.*'$", f"version={new_version}", properties_content, flags=re.M)
+    properties_content = re.sub(r"^version\s*=.*$", f"version={new_version}", properties_content, flags=re.M)
 
     with open("gradle.properties", "w") as file:
         file.write(properties_content)
@@ -39,8 +39,8 @@ try:
 
     subprocess.run(["git", "tag", new_version], check=True)
 
-    subprocess.run(["git", "push"], check=True)
-    subprocess.run(["git", "push", "--tags"], check=True)
+    subprocess.run(["git", "push"], check=True)  # Push changes (commits)
+    subprocess.run(["git", "push", "--tags"], check=True)  # Push tags
 
     print(f"Successfully committed and tagged version {new_version}.")
 
