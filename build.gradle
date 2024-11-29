@@ -26,10 +26,23 @@ dependencies {
     implementation group: 'org.ow2.asm', name: 'asm-commons', version: project.asmVersion
     implementation group: 'org.ow2.asm', name: 'asm-analysis', version: project.asmVersion
 
-    implementation fileTree(dir: 'lib', include: ['*.jar'])
+    implementation group: 'de.femtopedia.dex2jar', name: 'd2j-base-cmd', version: project.dex2jarVersion
+    implementation group: 'de.femtopedia.dex2jar', name: 'd2j-smali', version: project.dex2jarVersion
+    implementation group: 'de.femtopedia.dex2jar', name: 'dex-ir', version: project.dex2jarVersion
+    implementation group: 'de.femtopedia.dex2jar', name: 'dex-reader-api', version: project.dex2jarVersion
+    implementation group: 'de.femtopedia.dex2jar', name: 'dex-reader', version: project.dex2jarVersion
+    implementation group: 'de.femtopedia.dex2jar', name: 'dex-tools', version: project.dex2jarVersion
+    implementation group: 'de.femtopedia.dex2jar', name: 'dex-translator', version: project.dex2jarVersion
+    implementation group: 'de.femtopedia.dex2jar', name: 'dex-writer', version: project.dex2jarVersion
+
+    implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: project.fernflowerVersion
+
     testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-engine:${project.junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-params:${project.junitVersion}"
+
+    implementation fileTree(dir: 'lib', include: ['*.jar'])
+
 }
 
 test {
