@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = project.group
@@ -16,7 +15,6 @@ java {
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
-    google()
 }
 
 dependencies {
@@ -40,34 +38,16 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api:${project.junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-engine:${project.junitVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-params:${project.junitVersion}"
-
-    implementation fileTree(dir: 'lib', include: ['*.jar'])
-
 }
 
 test {
     useJUnitPlatform()
 }
 
-configurations {
-    shadowRuntime {
-        canBeResolved = true
-        canBeConsumed = false
-        extendsFrom implementation
-    }
-}
-
-shadowJar {
-    archiveClassifier.set('')
-    mergeServiceFiles()
-    configurations = [project.configurations.shadowRuntime]
-    from fileTree(dir: 'lib', include: ['*.jar'])
-}
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact shadowJar
+            from components.java
             groupId = project.group
             artifactId = 'JDSXTool'
             version = project.version
@@ -76,7 +56,6 @@ publishing {
     repositories {
         mavenLocal()
         maven { url 'https://jitpack.io' }
-        google()
     }
 }
 
