@@ -21,11 +21,11 @@ public class Dex {
      * @throws IllegalArgumentException if {@code dexPath} is invalid or the file is not a valid DEX file
      * @throws IOException              if an error occurs while accessing the file system
      */
-    public static Path convertDexToJar(Path dexPath) throws IOException {
+    public static Path convertDexToClassJar(Path dexPath) throws IOException {
         Utils.validateFilePath(dexPath, "Dex path");
 
         Path jarPath = Utils.getSiblingPath(dexPath, ".jar");
-        return convertDexToJar(dexPath, jarPath);
+        return convertDexToClassJar(dexPath, jarPath);
     }
 
     /**
@@ -38,7 +38,7 @@ public class Dex {
      * @throws RuntimeException         if an error occurs during the conversion
      * @throws IOException              if an error occurs while accessing the file system
      */
-    public static Path convertDexToJar(Path dexPath, Path jarPath) throws IOException {
+    public static Path convertDexToClassJar(Path dexPath, Path jarPath) throws IOException {
         Utils.validateFilePath(dexPath, "Dex path");
 
         if (jarPath == null) {
@@ -59,6 +59,7 @@ public class Dex {
      * The sibling folder is named based on the base name of the input DEX file.
      *
      * @param dexFilePath the path to the input DEX file
+     * @return the path to the folder containing the generated Smali files
      * @throws IllegalArgumentException if {@code dexFilePath} is invalid
      * @throws RuntimeException         if an error occurs during the conversion
      * @throws IOException              if an error occurs while accessing the file system
@@ -78,6 +79,7 @@ public class Dex {
      *
      * @param dexFilePath the path to the input DEX file
      * @param outputDir   the directory where the Smali files will be written
+     * @return the path to the directory containing the generated Smali files
      * @throws IllegalArgumentException if {@code dexFilePath} or {@code outputDir} is invalid
      * @throws RuntimeException         if an error occurs during the conversion
      * @throws IOException              if an error occurs while accessing the file system
@@ -99,7 +101,24 @@ public class Dex {
     }
 
     /**
+     * Converts a DEX file to Java source code.
+     * Dex -> Class Jar -> Java
+     *
+     * @param dexFilePath the path to the input DEX file
+     * @return the path to the generated Java source code file
+     * @throws IOException if an error occurs during the conversion process
+     */
+    public static Path convertDexToJava(Path dexFilePath) throws IOException {
+        Path classJar = Dex.convertDexToClassJar(dexFilePath);
+        return Jar.convertClassJarToJava(classJar);
+    }
+
+    /**
      * Checks if the given file is a valid DEX file by reading its magic header.
+     * <p>
+     * This method reads the first 8 bytes of the file and checks if it matches one of the valid
+     * DEX file magic headers ("dex\n035\0" or "dex\n036\0").
+     * </p>
      *
      * @param filePath the path to the file to check
      * @return {@code true} if the file is a valid DEX file, {@code false} otherwise

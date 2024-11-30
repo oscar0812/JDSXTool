@@ -97,8 +97,8 @@ public class Java {
     }
 
     /**
-     * Converts Java code into Smali code by first compiling the Java code to .class files,
-     * converting the class files into a .dex file, and then converting the .dex file to Smali.
+     * Converts Java code into Smali code
+     * Java -> Class -> Dex -> Smali
      *
      * @param javaFilePath the Java file path to be converted
      * @return The diectory path of the generated Smali files
@@ -111,8 +111,8 @@ public class Java {
     }
 
     /**
-     * Converts Java code into Smali code by first compiling the Java code to .class files,
-     * converting the class files into a .dex file, and then converting the .dex file to Smali.
+     * Converts Java code into Smali code
+     * Java -> Class -> Dex -> Smali
      *
      * @param javaCode the Java code to be converted
      * @return The diectory path of the generated Smali files

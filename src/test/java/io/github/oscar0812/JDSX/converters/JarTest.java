@@ -80,33 +80,33 @@ class JarTest {
     }
 
     @Test
-    void testConvertClassJarToJavaJar_ValidJar() throws IOException {
+    void testConvertClassJarToJava_ValidJar() throws IOException {
         Path jarFile = fileMap.get("test.jar");
         assertNotNull(jarFile);
 
-        Path outputDir = Jar.convertClassJarToJavaJar(jarFile);
+        Path outputDir = Jar.convertClassJarToJava(jarFile);
 
         assertTrue(Files.exists(outputDir));
         assertTrue(Files.list(outputDir).anyMatch(path -> path.toString().endsWith(".java")));
     }
 
     @Test
-    void testConvertClassJarToJavaJar_EmptyJar() {
+    void testConvertClassJarToJava_EmptyJar() {
         Path invalidJarFile = tempDir.resolve("empty.jar");
 
-        assertThrows(IOException.class, () -> Jar.convertClassJarToJavaJar(invalidJarFile));
+        assertThrows(IOException.class, () -> Jar.convertClassJarToJava(invalidJarFile));
     }
 
     @Test
-    void testConvertClassJarToJavaJar_MissingJar() {
+    void testConvertClassJarToJava_MissingJar() {
         Path invalidJarFile = tempDir.resolve("invalid.jar");
 
-        assertThrows(IOException.class, () -> Jar.convertClassJarToJavaJar(invalidJarFile));
+        assertThrows(IOException.class, () -> Jar.convertClassJarToJava(invalidJarFile));
     }
 
     @Test
-    void testConvertClassJarToJavaJar_NullJarFile() {
-        assertThrows(IllegalArgumentException.class, () -> Jar.convertClassJarToJavaJar(null));
+    void testConvertClassJarToJava_NullJarFile() {
+        assertThrows(IllegalArgumentException.class, () -> Jar.convertClassJarToJava(null));
     }
 
     @Test

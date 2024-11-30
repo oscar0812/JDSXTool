@@ -35,9 +35,7 @@ public class Class {
         }
 
         for (Path classFilePath : inputClassFilePaths) {
-            if (classFilePath == null || !Files.exists(classFilePath) || !Files.isRegularFile(classFilePath)) {
-                throw new IllegalArgumentException("Invalid input class file path: " + classFilePath);
-            }
+            Utils.validateFilePath(classFilePath, "Class path");
         }
 
         DxContext dxContext = new DxContext();
@@ -70,9 +68,7 @@ public class Class {
      * @throws IOException              if an error occurs while accessing the file system
      */
     public static Path convertClassFilesToDex(Path inputPath, Path outputDexPath) throws IOException {
-        if (inputPath == null || !Files.exists(inputPath)) {
-            throw new IllegalArgumentException("Input path is invalid or does not exist: " + inputPath);
-        }
+        Utils.validateFilePath(inputPath, "Class path");
 
         if (outputDexPath == null) {
             throw new IllegalArgumentException("Output DEX file path cannot be null or empty");
@@ -103,9 +99,7 @@ public class Class {
 
     /**
      * Converts `.class` files to a `.dex` file using an auto-generated sibling output path.
-     * <p>
-     * The `.dex` file is created as a sibling to the inputPath
-     * </p>
+     * Class -> Dex ->
      *
      * @param inputPath the path to a directory containing `.class` files or a single `.class` file
      * @return the path to the generated `.dex` file
@@ -115,5 +109,45 @@ public class Class {
     public static Path convertClassFilesToDex(Path inputPath) throws IOException {
         Path dexPath = Utils.getSiblingPath(inputPath, ".dex");
         return convertClassFilesToDex(inputPath, dexPath);
+    }
+
+    /**
+     * Converts `.class` files to Smali code.
+     * Class -> Dex -> Smali
+     *
+     * @param inputPath the path to a directory containing `.class` files or a single `.class` file
+     * @return the path to the generated Smali file
+     * @throws IOException if an error occurs during the conversion process
+     */
+    public static Path convertClassFilesToSmali(Path inputPath) throws IOException {
+        Path dexPath = convertClassFilesToDex(inputPath);
+        return Dex.convertDexToSmali(dexPath);
+    }
+
+    /**
+     * Converts `.class` files to a `.class.jar` file.
+     * Class -> Dex -> ClassJar
+     *
+     * @param inputPath the path to a directory containing `.class` files or a single `.class` file
+     * @return the path to the generated `.class.jar` file
+     * @throws IOException if an error occurs during the conversion process
+     */
+    public static Path convertClassFilesToClassJar(Path inputPath) throws IOException {
+        Path dexPath = convertClassFilesToDex(inputPath);
+        return Dex.convertDexToClassJar(dexPath);
+    }
+
+    /**
+     * Converts `.class` files to Java code.
+     * Class -> Dex -> ClassJar -> Java
+     *
+     * @param inputPath the path to a directory containing `.class` files or a single `.class` file
+     * @return the path to the generated Java file
+     * @throws IOException if an error occurs during the conversion process
+     */
+    public static Path convertClassFilesToJava(Path inputPath) throws IOException {
+        Path dexPath = convertClassFilesToDex(inputPath);
+        Path classJar = Dex.convertDexToClassJar(dexPath);
+        return Jar.convertClassJarToJava(classJar);
     }
 }

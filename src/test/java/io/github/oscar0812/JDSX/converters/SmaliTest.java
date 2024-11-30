@@ -137,18 +137,18 @@ public class SmaliTest {
     }
 
     @Test
-    public void testConvertSmaliToJar_Success() throws IOException {
+    public void testConvertSmaliToClassJar_Success() throws IOException {
         Path jarPath = tempDir.resolve("output.jar");
-        Path result = Smali.convertSmaliToJar(".class public Lcom/example/Test;", jarPath);
+        Path result = Smali.convertSmaliToClassJar(".class public Lcom/example/Test;", jarPath);
         assertNotNull(result);
         assertTrue(Files.exists(result));
         assertTrue(result.toString().endsWith(".jar"));
     }
 
     @Test
-    public void testConvertSmaliToJar_NullCode() {
+    public void testConvertSmaliToClassJar_NullCode() {
         assertThrows(IllegalArgumentException.class, () -> {
-            Smali.convertSmaliToJar(null, tempDir.resolve("output.jar"));
+            Smali.convertSmaliToClassJar(null, tempDir.resolve("output.jar"));
         });
     }
 

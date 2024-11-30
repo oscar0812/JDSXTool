@@ -44,35 +44,35 @@ class DexTest {
     }
 
     @Test
-    void testConvertDexToJar_ValidDexFile() throws IOException {
+    void testConvertDexToClassJar_ValidDexFileClass() throws IOException {
         Path dexFile = fileMap.get("test.dex");
         assertNotNull(dexFile);
 
         Path jarPath = dexFile.resolveSibling("test.jar");
 
-        Path result = Dex.convertDexToJar(dexFile);
+        Path result = Dex.convertDexToClassJar(dexFile);
 
         assertEquals(jarPath, result);
         assertTrue(Files.exists(jarPath));
     }
 
     @Test
-    void testConvertDexToJar_InvalidDexFile() {
+    void testConvertDexToClassJar_InvalidDexFileClass() {
         Path invalidDexFile = tempDir.resolve("invalid.dex");
 
-        assertThrows(IOException.class, () -> Dex.convertDexToJar(invalidDexFile));
+        assertThrows(IOException.class, () -> Dex.convertDexToClassJar(invalidDexFile));
     }
 
     @Test
-    void testConvertDexToJar_NullDexFile() {
-        assertThrows(IllegalArgumentException.class, () -> Dex.convertDexToJar((Path) null));
+    void testConvertDexToClassJar_NullDexFileClass() {
+        assertThrows(IllegalArgumentException.class, () -> Dex.convertDexToClassJar((Path) null));
     }
 
     @Test
-    void testConvertDexToJar_EmptyDexFile() throws IOException {
+    void testConvertDexToClassJar_EmptyDexFileClass() throws IOException {
         Path emptyDexFile = tempDir.resolve("empty.dex");
 
-        assertThrows(IllegalArgumentException.class, () -> Dex.convertDexToJar(emptyDexFile));
+        assertThrows(IllegalArgumentException.class, () -> Dex.convertDexToClassJar(emptyDexFile));
     }
 
     @ParameterizedTest
@@ -125,10 +125,10 @@ class DexTest {
     }
 
     @Test
-    void testConvertDexToJar_NullOutputPath() {
+    void testConvertDexToClassJar_NullOutputPath() {
         Path dexFile = fileMap.get("test.dex");
 
-        assertThrows(IllegalArgumentException.class, () -> Dex.convertDexToJar(dexFile, null));
+        assertThrows(IllegalArgumentException.class, () -> Dex.convertDexToClassJar(dexFile, null));
     }
 
     @Test
