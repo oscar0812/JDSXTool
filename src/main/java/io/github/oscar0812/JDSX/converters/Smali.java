@@ -23,10 +23,36 @@ public class Smali {
         if (smaliCode == null || smaliCode.isEmpty()) {
             throw new IllegalArgumentException("Smali code cannot be null or empty.");
         }
-        Path tempDir = Files.createTempDirectory("smali_temp");
+        Path tempDir = Utils.createTempDirectory("smali_temp");
         Path smaliFile = tempDir.resolve("TempSmali.smali");
         Files.write(smaliFile, smaliCode.getBytes());
         return smaliFile;
+    }
+
+    /**
+     * Converts Smali code to a DEX file.
+     *
+     * @param smaliCode the Smali code to be converted
+     * @return the path to the generated DEX file
+     * @throws IOException if an I/O error occurs during conversion
+     */
+    public static Path convertSmaliToDex(String smaliCode) throws IOException {
+        Path smaliPath = createTempSmaliFile(smaliCode);
+        Path dexPath = Utils.getSiblingPath(smaliPath, ".dex");
+        return convertSmaliToDex(smaliPath, dexPath);
+    }
+
+    /**
+     * Converts Smali code to a DEX file.
+     *
+     * @param smaliCode the Smali code to be converted
+     * @param dexPath the path where the resulting DEX file will be saved
+     * @return the path to the generated DEX file
+     * @throws IOException if an I/O error occurs during conversion
+     */
+    public static Path convertSmaliToDex(String smaliCode, Path dexPath) throws IOException {
+        Path smaliPath = createTempSmaliFile(smaliCode);
+        return convertSmaliToDex(smaliPath, dexPath);
     }
 
     /**
@@ -54,16 +80,41 @@ public class Smali {
     }
 
     /**
-     * Converts Smali code to a DEX file.
+     * Converts a Smali file to a DEX file.
      *
-     * @param smaliCode the Smali code to be converted
-     * @param dexPath the path where the resulting DEX file will be saved
+     * @param smaliPath the path to the Smali file
      * @return the path to the generated DEX file
      * @throws IOException if an I/O error occurs during conversion
+     * @throws IllegalArgumentException if the DEX output path is null
      */
-    public static Path convertSmaliToDex(String smaliCode, Path dexPath) throws IOException {
-        Path smaliPath = createTempSmaliFile(smaliCode);
+    public static Path convertSmaliToDex(Path smaliPath) throws IOException {
+        Utils.validateFilePath(smaliPath, "Smali path");
+        Path dexPath = Utils.getSiblingPath(smaliPath, "output.dex");
         return convertSmaliToDex(smaliPath, dexPath);
+    }
+
+    /**
+     * Converts Smali code to a JAR file.
+     *
+     * @param smaliCode the Smali code to be converted
+     * @return the path to the generated JAR file
+     * @throws IOException if an I/O error occurs during conversion
+     */
+    public static Path convertSmaliToJar(String smaliCode) throws IOException {
+        Path smaliPath = createTempSmaliFile(smaliCode);
+        return convertSmaliToJar(smaliPath);
+    }
+
+    /**
+     * Converts a Smali file to a JAR file.
+     *
+     * @param smaliPath the Smali code path to be converted
+     * @return the path to the generated JAR file
+     * @throws IOException if an I/O error occurs during conversion
+     */
+    public static Path convertSmaliToJar(Path smaliPath) throws IOException {
+        Path dexPath = convertSmaliToDex(smaliPath);
+        return Dex.convertDexToJar(dexPath);
     }
 
     /**
@@ -76,8 +127,7 @@ public class Smali {
      */
     public static Path convertSmaliToJar(String smaliCode, Path jarPath) throws IOException {
         Path smaliPath = createTempSmaliFile(smaliCode);
-        Path dexPath = Utils.generateSiblingPath(jarPath, ".dex");
-        convertSmaliToDex(smaliPath, dexPath);
+        Path dexPath = convertSmaliToDex(smaliPath);
         return Dex.convertDexToJar(dexPath, jarPath);
     }
 
@@ -89,9 +139,19 @@ public class Smali {
      * @throws IOException if an I/O error occurs during conversion
      */
     public static Path convertSmaliToClasses(String smaliCode) throws IOException {
-        Path smaliPath = createTempSmaliFile(smaliCode);
-        Path jarPath = Utils.generateSiblingPath(smaliPath, ".jar");
-        jarPath = convertSmaliToJar(smaliCode, jarPath);
+        Path jarPath = convertSmaliToJar(smaliCode);
+        return Jar.extractJar(jarPath);
+    }
+
+    /**
+     * Converts Smali code to class files by first converting it to a JAR file and then extracting the classes.
+     *
+     * @param smaliPath the Smali path code to be converted
+     * @return the path to the extracted classes
+     * @throws IOException if an I/O error occurs during conversion
+     */
+    public static Path convertSmaliToClasses(Path smaliPath) throws IOException {
+        Path jarPath = convertSmaliToJar(smaliPath);
         return Jar.extractJar(jarPath);
     }
 
@@ -103,9 +163,7 @@ public class Smali {
      * @throws IOException if an I/O error occurs during conversion
      */
     public static Path convertSmaliToJava(String smaliCode) throws IOException {
-        Path smaliPath = createTempSmaliFile(smaliCode);
-        Path jarPath = Utils.generateSiblingPath(smaliPath, ".jar");
-        jarPath = convertSmaliToJar(smaliCode, jarPath);
+        Path jarPath = convertSmaliToJar(smaliCode);
         return Jar.convertClassJarToJavaJar(jarPath);
     }
 }

@@ -24,7 +24,7 @@ public class Jar {
      */
     public static Path extractJar(Path jarPath) throws IOException {
         Utils.validateFilePath(jarPath, "JAR path");
-        Path outputDir = Utils.generateSiblingPath(jarPath, "_extract");
+        Path outputDir = Utils.getSiblingPath(jarPath, "_extract");
         Files.createDirectories(outputDir);
         extractJar(jarPath, outputDir);
 
@@ -77,7 +77,7 @@ public class Jar {
      */
     public static Path convertClassJarToJavaJar(Path jarPath) throws IOException {
         Utils.validateFilePath(jarPath, "JAR path");
-        Path outputDir = Utils.generateSiblingPath(jarPath, "_java");
+        Path outputDir = Utils.getSiblingPath(jarPath, "_java");
         Files.createDirectories(outputDir);
         ConsoleDecompiler.main(new String[]{
                 jarPath.toString(),

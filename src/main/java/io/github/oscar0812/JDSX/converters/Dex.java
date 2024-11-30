@@ -24,7 +24,7 @@ public class Dex {
     public static Path convertDexToJar(Path dexPath) throws IOException {
         Utils.validateFilePath(dexPath, "Dex path");
 
-        Path jarPath = Utils.generateSiblingPath(dexPath, ".jar");
+        Path jarPath = Utils.getSiblingPath(dexPath, ".jar");
         return convertDexToJar(dexPath, jarPath);
     }
 
@@ -63,14 +63,14 @@ public class Dex {
      * @throws RuntimeException         if an error occurs during the conversion
      * @throws IOException              if an error occurs while accessing the file system
      */
-    public static void convertDexToSmali(Path dexFilePath) throws IOException {
+    public static Path convertDexToSmali(Path dexFilePath) throws IOException {
         Utils.validateFilePath(dexFilePath, "Dex path");
 
         // Create a sibling directory for the Smali files
-        Path outputDir = Utils.generateSiblingPath(dexFilePath, "_smali");
+        Path outputDir = Utils.getSiblingPath(dexFilePath, "_smali");
         Files.createDirectories(outputDir);
 
-        convertDexToSmali(dexFilePath, outputDir);
+        return convertDexToSmali(dexFilePath, outputDir);
     }
 
     /**
@@ -82,7 +82,7 @@ public class Dex {
      * @throws RuntimeException         if an error occurs during the conversion
      * @throws IOException              if an error occurs while accessing the file system
      */
-    public static void convertDexToSmali(Path dexFilePath, Path outputDir) throws IOException {
+    public static Path convertDexToSmali(Path dexFilePath, Path outputDir) throws IOException {
         Utils.validateFilePath(dexFilePath, "Dex path");
 
         if (outputDir == null) {
@@ -95,6 +95,7 @@ public class Dex {
         } catch (Exception e) {
             throw new RuntimeException("Error converting DEX to Smali", e);
         }
+        return outputDir;
     }
 
     /**

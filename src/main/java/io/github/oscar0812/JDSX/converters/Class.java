@@ -113,7 +113,7 @@ public class Class {
      * @throws IOException              if an error occurs while accessing the file system
      */
     public static Path convertClassFilesToDex(Path inputPath) throws IOException {
-        Path dexPath = Utils.generateSiblingPath(inputPath, ".dex");
+        Path dexPath = Utils.getSiblingPath(inputPath, ".dex");
         return convertClassFilesToDex(inputPath, dexPath);
     }
 }

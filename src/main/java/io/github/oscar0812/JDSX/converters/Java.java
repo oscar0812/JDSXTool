@@ -22,6 +22,19 @@ public class Java {
      * Compiles a given Java file into .class files and stores them in a specified temporary directory.
      *
      * @param javaFile  the path to the Java source file to be compiled
+     * @return the directory where the compiled .class files are stored
+     * @throws IOException           if an I/O error occurs during compilation or file management
+     * @throws IllegalStateException if the Java compiler is not available
+     */
+    public static Path compileJavaToClass(Path javaFile) throws IOException {
+        Path outputDir = Utils.getSiblingPath(javaFile, "compiled_classes");
+        return compileJavaToClass(javaFile, outputDir);
+    }
+
+    /**
+     * Compiles a given Java file into .class files and stores them in a specified temporary directory.
+     *
+     * @param javaFile  the path to the Java source file to be compiled
      * @param outputDir the directory to store the compiled .class files
      * @return the directory where the compiled .class files are stored
      * @throws IOException           if an I/O error occurs during compilation or file management
@@ -36,7 +49,7 @@ public class Java {
         }
 
         // Create a subfolder for the compiled .class files
-        Path classOutputDir = outputDir.resolve("compiled_classes");
+        Path classOutputDir = outputDir.resolve("out");
         if (Files.notExists(classOutputDir)) {
             Files.createDirectories(classOutputDir);
         }
@@ -60,14 +73,14 @@ public class Java {
     }
 
     /**
-     * Converts Java code into Smali code by first compiling the Java code to .class files,
-     * converting the class files into a .dex file, and then converting the .dex file to Smali.
+     * Creates a temporary file containing the given Java code.
      *
-     * @param javaCode the Java code to be converted
-     * @return an array of paths to the generated Smali files
-     * @throws Exception if any error occurs during the conversion process
+     * @param javaCode the Java code to be written to the file
+     * @return the path to the created temporary Java file
+     * @throws IOException if an I/O error occurs during file creation or writing
+     * @throws IllegalArgumentException if the provided Java code is null or empty
      */
-    public static Path[] convertJavaToSmali(String javaCode) throws Exception {
+    private static Path createTempJavaFile(String javaCode) throws IOException {
         if (javaCode == null || javaCode.trim().isEmpty()) {
             throw new IllegalArgumentException("Provided Java code is null or empty");
         }
@@ -77,26 +90,39 @@ public class Java {
             throw new IllegalArgumentException("Failed to determine class name from the provided Java code");
         }
 
-        Path tempDir = Utils.createTempDirectory();
-
-        Path tempJavaFile = tempDir.resolve(className + ".java");
-        Files.write(tempJavaFile, javaCode.getBytes());
-
-        Path classOutputDir = compileJavaToClass(tempJavaFile, tempDir);
-
-        Path outputDexPath = tempDir.resolve("Temp.dex");
-
-        Path[] classFiles = Utils.getFiles(classOutputDir, ".class");
-
-        Class.convertClassFilesToDex(classFiles, outputDexPath);
-
-        Path smaliSubDir = tempDir.resolve("smali");
-        Files.createDirectories(smaliSubDir);
-
-        Dex.convertDexToSmali(outputDexPath, smaliSubDir);
-
-        return Utils.getFiles(smaliSubDir, ".smali");
+        Path tempDir = Utils.createTempDirectory("java_temp");
+        Path javaFilePath = tempDir.resolve(className + ".java");
+        Files.write(javaFilePath, javaCode.getBytes());
+        return javaFilePath;
     }
+
+    /**
+     * Converts Java code into Smali code by first compiling the Java code to .class files,
+     * converting the class files into a .dex file, and then converting the .dex file to Smali.
+     *
+     * @param javaFilePath the Java file path to be converted
+     * @return The diectory path of the generated Smali files
+     * @throws Exception if any error occurs during the conversion process
+     */
+    public static Path convertJavaToSmali(Path javaFilePath) throws Exception {
+        Path classOutputDir = compileJavaToClass(javaFilePath);
+        Path outputDexPath = Class.convertClassFilesToDex(classOutputDir);
+        return Dex.convertDexToSmali(outputDexPath);
+    }
+
+    /**
+     * Converts Java code into Smali code by first compiling the Java code to .class files,
+     * converting the class files into a .dex file, and then converting the .dex file to Smali.
+     *
+     * @param javaCode the Java code to be converted
+     * @return The diectory path of the generated Smali files
+     * @throws Exception if any error occurs during the conversion process
+     */
+    public static Path convertJavaToSmali(String javaCode) throws Exception {
+        Path javaFilePath = createTempJavaFile(javaCode);
+        return convertJavaToSmali(javaFilePath);
+    }
+
 
     /**
      * Extracts the class name from a given Java code string using regular expressions.
