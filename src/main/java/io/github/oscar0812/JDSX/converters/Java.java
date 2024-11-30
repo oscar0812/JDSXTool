@@ -94,14 +94,8 @@ public class Java {
         Files.write(tempJavaFile, javaCode.getBytes());
 
         Path[] classFiles = compileJavaToClass(tempJavaFile, tempDir);
-
-        String[] classFilePaths = new String[classFiles.length];
-        for (int i = 0; i < classFiles.length; i++) {
-            classFilePaths[i] = classFiles[i].toString();
-        }
-
         Path outputDexPath = tempDir.resolve("Temp.dex");
-        Dex.convertClassFilesToDex(classFilePaths, outputDexPath);
+        Class.convertClassFilesToDex(classFiles, outputDexPath);
 
         Path smaliSubDir = tempDir.resolve("smali");
         Files.createDirectories(smaliSubDir);

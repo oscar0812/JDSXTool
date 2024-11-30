@@ -84,34 +84,6 @@ class DexTest {
     }
 
     @Test
-    void testConvertClassFilesToDex_ValidClassFile() throws IOException {
-        Path classFile = fileMap.get("HelloWorld.class");
-        assertNotNull(classFile);
-
-        Path dexPath = tempDir.resolve("output.dex");
-
-        Dex.convertClassFilesToDex(new String[]{classFile.toString()}, dexPath);
-
-        assertTrue(Files.exists(dexPath));
-    }
-
-    @Test
-    void testConvertClassFilesToDex_EmptyClassFile() throws IOException {
-        Path invalidClassFile = tempDir.resolve("Empty.class");
-
-        Path dexPath = tempDir.resolve("output.dex");
-        Dex.convertClassFilesToDex(new String[]{invalidClassFile.toString()}, dexPath);
-        assertFalse(Files.exists(dexPath));
-    }
-
-    @Test
-    void testConvertClassFilesToDex_NullClassFile() {
-        Path dexPath = tempDir.resolve("output.dex");
-
-        assertThrows(IllegalArgumentException.class, () -> Dex.convertClassFilesToDex(null, dexPath));
-    }
-
-    @Test
     void testConvertDexToSmali_ValidDex() throws IOException {
         Path dexFile = fileMap.get("test.dex");
         assertNotNull(dexFile);
@@ -155,10 +127,35 @@ class DexTest {
     }
 
     @Test
-    void testConvertClassFilesToDex_NullOutputDexPath() throws IOException {
-        Path classFile = fileMap.get("HelloWorld.class");
+    void testConvertDexToSmali_AutoOutputDir_ValidDex() throws IOException {
+        Path dexFile = fileMap.get("test.dex");
+        assertNotNull(dexFile);
 
-        assertThrows(IllegalArgumentException.class, () -> Dex.convertClassFilesToDex(new String[]{classFile.toString()}, null));
+        // Expected sibling directory for Smali files
+        Path expectedOutputDir = dexFile.resolveSibling("test_smali");
+
+        // Call the method to test
+        Dex.convertDexToSmali(dexFile);
+
+        // Assert the output directory is created and contains files
+        assertTrue(Files.isDirectory(expectedOutputDir));
+        assertTrue(Files.list(expectedOutputDir).findAny().isPresent());
+    }
+
+    @Test
+    void testConvertDexToSmali_AutoOutputDir_InvalidDex() {
+        Path invalidDexFile = tempDir.resolve("invalid.dex");
+
+        // Ensure no unexpected exceptions occur and directory is not created
+        assertThrows(IOException.class, () -> Dex.convertDexToSmali(invalidDexFile));
+
+        Path expectedOutputDir = invalidDexFile.resolveSibling("invalid_smali");
+        assertFalse(Files.exists(expectedOutputDir));
+    }
+
+    @Test
+    void testConvertDexToSmali_AutoOutputDir_NullDexFile() {
+        assertThrows(IllegalArgumentException.class, () -> Dex.convertDexToSmali(null));
     }
 
     private Map<String, Path> copyAllFilesToTemp() throws IOException {

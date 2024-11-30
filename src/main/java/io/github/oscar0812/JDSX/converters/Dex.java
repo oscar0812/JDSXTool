@@ -11,23 +11,22 @@ import java.nio.file.Path;
 
 /**
  * Utility class for converting between DEX, JAR, and Smali formats.
+ * Provides methods for validating files and converting between these formats.
  */
 public class Dex {
     /**
-     * Converts a DEX file to a JAR file. The output JAR file will be created in the same directory
-     * as the input DEX file with the same base name and a `.jar` extension.
+     * Converts a DEX file to a JAR file. The output JAR file is created in the same directory
+     * as the input DEX file, with the same base name and a `.jar` extension.
      *
      * @param dexPath the path to the input DEX file
      * @return the path to the generated JAR file
      * @throws IllegalArgumentException if {@code dexPath} is invalid or the file is not a valid DEX file
+     * @throws IOException              if an error occurs while accessing the file system
      */
     public static Path convertDexToJar(Path dexPath) throws IOException {
         Utils.validateFilePath(dexPath, "Dex path");
 
-        // Determine the sibling JAR file path
         Path jarPath = Utils.generateSiblingPath(dexPath, ".jar");
-
-        // Call the existing method
         return convertDexToJar(dexPath, jarPath);
     }
 
@@ -39,6 +38,7 @@ public class Dex {
      * @return the path to the generated JAR file
      * @throws IllegalArgumentException if {@code dexPath} is invalid or {@code jarPath} is null
      * @throws RuntimeException         if an error occurs during the conversion
+     * @throws IOException              if an error occurs while accessing the file system
      */
     public static Path convertDexToJar(Path dexPath, Path jarPath) throws IOException {
         Utils.validateFilePath(dexPath, "Dex path");
@@ -57,29 +57,22 @@ public class Dex {
     }
 
     /**
-     * Converts an array of class files into a DEX file.
+     * Converts a DEX file to Smali files, creating a sibling folder for the output.
+     * The sibling folder is named based on the base name of the input DEX file.
      *
-     * @param inputClassFilePaths an array of paths to the input class files
-     * @param outputDexPath       the path to the output DEX file
-     * @throws IOException      if an error occurs during file processing
-     * @throws RuntimeException if an error occurs during the conversion
+     * @param dexFilePath the path to the input DEX file
+     * @throws IllegalArgumentException if {@code dexFilePath} is invalid
+     * @throws RuntimeException         if an error occurs during the conversion
+     * @throws IOException              if an error occurs while accessing the file system
      */
-    public static void convertClassFilesToDex(String[] inputClassFilePaths, Path outputDexPath) throws IOException {
-        if (inputClassFilePaths == null || inputClassFilePaths.length == 0) {
-            throw new IllegalArgumentException("No input class files provided");
-        }
+    public static void convertDexToSmali(Path dexFilePath) throws IOException {
+        Utils.validateFilePath(dexFilePath, "Dex path");
 
-        if (outputDexPath == null) {
-            throw new IllegalArgumentException("Output DEX file path cannot be null or empty");
-        }
+        // Create a sibling directory for the Smali files
+        Path outputDir = Utils.generateSiblingPath(dexFilePath, "_smali");
+        Files.createDirectories(outputDir);
 
-        DxContext dxContext = new DxContext();
-        Main.Arguments arguments = new Main.Arguments();
-        arguments.outName = outputDexPath.toString();
-        arguments.strictNameCheck = false;
-        arguments.fileNames = inputClassFilePaths;
-
-        new Main(dxContext).runDx(arguments);
+        convertDexToSmali(dexFilePath, outputDir);
     }
 
     /**
@@ -87,7 +80,9 @@ public class Dex {
      *
      * @param dexFilePath the path to the input DEX file
      * @param outputDir   the directory where the Smali files will be written
-     * @throws RuntimeException if an error occurs during the conversion
+     * @throws IllegalArgumentException if {@code dexFilePath} or {@code outputDir} is invalid
+     * @throws RuntimeException         if an error occurs during the conversion
+     * @throws IOException              if an error occurs while accessing the file system
      */
     public static void convertDexToSmali(Path dexFilePath, Path outputDir) throws IOException {
         Utils.validateFilePath(dexFilePath, "Dex path");
@@ -108,7 +103,8 @@ public class Dex {
      * Checks if the given file is a valid DEX file by reading its magic header.
      *
      * @param filePath the path to the file to check
-     * @return true if the file is a valid DEX file, false otherwise
+     * @return {@code true} if the file is a valid DEX file, {@code false} otherwise
+     * @throws IllegalArgumentException if {@code filePath} is null or invalid
      */
     public static boolean isValidDexFile(Path filePath) {
         if (filePath == null) {
@@ -126,7 +122,7 @@ public class Dex {
 
             // DEX magic header is "dex\n035\0" or "dex\n036\0"
             String headerString = new String(header, 0, 8);
-            return headerString.equals("dex\n035\0") || headerString.equals("dex\n036\0");
+            return "dex\n035\0".equals(headerString) || "dex\n036\0".equals(headerString);
         } catch (IOException e) {
             return false;
         }
