@@ -28,8 +28,10 @@ public class JavaTest {
 
     @Test
     public void testCompileJavaToClass_Success() throws IOException {
-        Path[] classFiles = Java.compileJavaToClass(javaFile, tempDir);
-        assertNotNull(classFiles);
+        Path classesDir = Java.compileJavaToClass(javaFile, tempDir);
+        assertNotNull(classesDir);
+
+        Path[] classFiles = Utils.getFiles(classesDir);
         assertTrue(classFiles.length > 0);
         assertTrue(classFiles[0].toString().endsWith(".class"));
     }
@@ -113,9 +115,12 @@ public class JavaTest {
                 "}";
         javaFile = tempDir.resolve("FolderExists.java");
         Files.write(javaFile, javaCode.getBytes());
-        Path[] classFiles = Java.compileJavaToClass(javaFile, tempDir);
-        assertNotNull(classFiles);
+        Path classesDir = Java.compileJavaToClass(javaFile, tempDir);
+        assertNotNull(classesDir);
+
+        Path[] classFiles = Utils.getFiles(classesDir);
         assertTrue(classFiles.length > 0);
+        assertTrue(classFiles[0].toString().endsWith(".class"));
     }
 
     @Test

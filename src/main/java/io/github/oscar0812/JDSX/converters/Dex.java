@@ -1,7 +1,5 @@
 package io.github.oscar0812.JDSX.converters;
 
-import com.android.dx.command.dexer.DxContext;
-import com.android.dx.command.dexer.Main;
 import com.googlecode.d2j.smali.BaksmaliCmd;
 import com.googlecode.dex2jar.tools.Dex2jarCmd;
 

@@ -4,7 +4,6 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,8 +11,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Utility class for operations related to Java files, such as compiling Java code into .class files,
@@ -24,13 +21,13 @@ public class Java {
     /**
      * Compiles a given Java file into .class files and stores them in a specified temporary directory.
      *
-     * @param javaFile the path to the Java source file to be compiled
-     * @param tempDir the directory to store the compiled .class files
-     * @return an array of paths to the generated .class files
-     * @throws IOException if an I/O error occurs during compilation or file management
+     * @param javaFile  the path to the Java source file to be compiled
+     * @param outputDir the directory to store the compiled .class files
+     * @return the directory where the compiled .class files are stored
+     * @throws IOException           if an I/O error occurs during compilation or file management
      * @throws IllegalStateException if the Java compiler is not available
      */
-    public static Path[] compileJavaToClass(Path javaFile, Path tempDir) throws IOException {
+    public static Path compileJavaToClass(Path javaFile, Path outputDir) throws IOException {
         Utils.validateFilePath(javaFile, "Java path");
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -39,7 +36,7 @@ public class Java {
         }
 
         // Create a subfolder for the compiled .class files
-        Path classOutputDir = tempDir.resolve("compiled_classes");
+        Path classOutputDir = outputDir.resolve("compiled_classes");
         if (Files.notExists(classOutputDir)) {
             Files.createDirectories(classOutputDir);
         }
@@ -52,22 +49,14 @@ public class Java {
 
         fileManager.close();
 
-        if (!success) {
+        Path[] createdClasses = Utils.getFiles(classOutputDir, ".class");
+
+        if (!success || createdClasses.length == 0) {
             throw new IOException("Failed to compile Java to .class files");
         }
 
-        // Retrieve all .class files in the subfolder
-        try (Stream<Path> classFilesStream = Files.walk(classOutputDir)) {
-            List<Path> classFiles = classFilesStream
-                    .filter(path -> path.toString().endsWith(".class"))
-                    .toList();
-
-            if (classFiles.isEmpty()) {
-                throw new IOException("No .class files were generated");
-            }
-
-            return classFiles.toArray(new Path[0]);
-        }
+        // Instead of returning the .class files, return the output directory
+        return classOutputDir;
     }
 
     /**
@@ -93,8 +82,12 @@ public class Java {
         Path tempJavaFile = tempDir.resolve(className + ".java");
         Files.write(tempJavaFile, javaCode.getBytes());
 
-        Path[] classFiles = compileJavaToClass(tempJavaFile, tempDir);
+        Path classOutputDir = compileJavaToClass(tempJavaFile, tempDir);
+
         Path outputDexPath = tempDir.resolve("Temp.dex");
+
+        Path[] classFiles = Utils.getFiles(classOutputDir, ".class");
+
         Class.convertClassFilesToDex(classFiles, outputDexPath);
 
         Path smaliSubDir = tempDir.resolve("smali");
@@ -102,7 +95,7 @@ public class Java {
 
         Dex.convertDexToSmali(outputDexPath, smaliSubDir);
 
-        return Utils.getFiles(smaliSubDir, "smali");
+        return Utils.getFiles(smaliSubDir, ".smali");
     }
 
     /**

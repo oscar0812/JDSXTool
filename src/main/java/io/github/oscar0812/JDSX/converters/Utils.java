@@ -59,20 +59,31 @@ class Utils {
     }
 
     /**
-     * Retrieves all files with the specified extension from the given directory.
+     * Retrieves all files from the given directory.
      *
-     * @param smaliDir the directory to search for files
-     * @param extension the file extension to filter by (e.g., "smali")
+     * @param dirPath the directory to search for files
      * @return an array of paths to the files with the specified extension
      * @throws IOException if an I/O error occurs while reading the directory
      */
-    public static Path[] getFiles(Path smaliDir, String extension) throws IOException {
-        List<Path> smaliFiles = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(smaliDir, "*." + extension)) {
+    public static Path[] getFiles(Path dirPath) throws IOException {
+        return getFiles(dirPath, "");
+    }
+
+    /**
+     * Retrieves all files with the specified extension from the given directory.
+     *
+     * @param dirPath the directory to search for files
+     * @param extension the file extension to filter by (e.g., ".smali")
+     * @return an array of paths to the files with the specified extension
+     * @throws IOException if an I/O error occurs while reading the directory
+     */
+    public static Path[] getFiles(Path dirPath, String extension) throws IOException {
+        List<Path> filePaths = new ArrayList<>();
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*" + extension)) {
             for (Path entry : stream) {
-                smaliFiles.add(entry);
+                filePaths.add(entry);
             }
         }
-        return smaliFiles.toArray(new Path[0]);
+        return filePaths.toArray(new Path[0]);
     }
 }
