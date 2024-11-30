@@ -20,10 +20,9 @@ public class Dex {
      * @param dexPath the path to the input DEX file
      * @return the path to the generated JAR file
      * @throws IllegalArgumentException if {@code dexPath} is invalid or the file is not a valid DEX file
-     * @throws RuntimeException         if an error occurs during the conversion
      */
-    public static Path convertDexToJar(Path dexPath) {
-        validateFilePath(dexPath, "Dex path");
+    public static Path convertDexToJar(Path dexPath) throws IOException {
+        Utils.validateFilePath(dexPath, "Dex path");
 
         // Determine the sibling JAR file path
         Path jarPath = Utils.generateSiblingPath(dexPath, ".jar");
@@ -41,8 +40,8 @@ public class Dex {
      * @throws IllegalArgumentException if {@code dexPath} is invalid or {@code jarPath} is null
      * @throws RuntimeException         if an error occurs during the conversion
      */
-    public static Path convertDexToJar(Path dexPath, Path jarPath) {
-        validateFilePath(dexPath, "Dex path");
+    public static Path convertDexToJar(Path dexPath, Path jarPath) throws IOException {
+        Utils.validateFilePath(dexPath, "Dex path");
 
         if (jarPath == null) {
             throw new IllegalArgumentException("JAR output path cannot be null.");
@@ -90,8 +89,8 @@ public class Dex {
      * @param outputDir   the directory where the Smali files will be written
      * @throws RuntimeException if an error occurs during the conversion
      */
-    public static void convertDexToSmali(Path dexFilePath, Path outputDir) {
-        validateFilePath(dexFilePath, "Dex path");
+    public static void convertDexToSmali(Path dexFilePath, Path outputDir) throws IOException {
+        Utils.validateFilePath(dexFilePath, "Dex path");
 
         if (outputDir == null) {
             throw new IllegalArgumentException("Output directory path cannot be null or empty");
@@ -130,31 +129,6 @@ public class Dex {
             return headerString.equals("dex\n035\0") || headerString.equals("dex\n036\0");
         } catch (IOException e) {
             return false;
-        }
-    }
-
-    /**
-     * Validates if a given file path is valid and the file exists.
-     *
-     * @param filePath  the path to validate
-     * @param paramName the name of the parameter (for error reporting)
-     * @throws IllegalArgumentException if the file path is invalid
-     */
-    public static void validateFilePath(Path filePath, String paramName) {
-        if (filePath == null) {
-            throw new IllegalArgumentException(paramName + " cannot be null.");
-        }
-
-        if (!Files.exists(filePath)) {
-            throw new IllegalArgumentException(paramName + " does not exist: " + filePath);
-        }
-
-        if (!Files.isRegularFile(filePath)) {
-            throw new IllegalArgumentException(paramName + " is not a regular file: " + filePath);
-        }
-
-        if (!Files.isReadable(filePath)) {
-            throw new IllegalArgumentException(paramName + " is not readable: " + filePath);
         }
     }
 }

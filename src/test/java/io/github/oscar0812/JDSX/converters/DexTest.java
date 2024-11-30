@@ -39,7 +39,7 @@ class DexTest {
     }
 
     @Test
-    void testConvertDexToJar_ValidDexFile() {
+    void testConvertDexToJar_ValidDexFile() throws IOException {
         Path dexFile = fileMap.get("test.dex");
         assertNotNull(dexFile);
 
@@ -55,7 +55,7 @@ class DexTest {
     void testConvertDexToJar_InvalidDexFile() {
         Path invalidDexFile = tempDir.resolve("invalid.dex");
 
-        assertThrows(IllegalArgumentException.class, () -> Dex.convertDexToJar(invalidDexFile));
+        assertThrows(IOException.class, () -> Dex.convertDexToJar(invalidDexFile));
     }
 
     @Test
@@ -130,7 +130,7 @@ class DexTest {
 
         Path outputDir = tempDir.resolve("smali-output");
 
-        assertThrows(RuntimeException.class, () -> Dex.convertDexToSmali(invalidDexFile, outputDir));
+        assertThrows(IOException.class, () -> Dex.convertDexToSmali(invalidDexFile, outputDir));
     }
 
     @Test
@@ -159,26 +159,6 @@ class DexTest {
         Path classFile = fileMap.get("HelloWorld.class");
 
         assertThrows(IllegalArgumentException.class, () -> Dex.convertClassFilesToDex(new String[]{classFile.toString()}, null));
-    }
-
-    @Test
-    void testValidateFilePath_NullPath() {
-        assertThrows(IllegalArgumentException.class, () -> Dex.validateFilePath(null, "test"));
-    }
-
-    @Test
-    void testValidateFilePath_FileDoesNotExist() {
-        Path nonExistentFile = tempDir.resolve("nonexistent.file");
-
-        assertThrows(IllegalArgumentException.class, () -> Dex.validateFilePath(nonExistentFile, "test"));
-    }
-
-    @Test
-    void testValidateFilePath_NotAFile() throws IOException {
-        Path directory = tempDir.resolve("dir");
-        Files.createDirectory(directory);
-
-        assertThrows(IllegalArgumentException.class, () -> Dex.validateFilePath(directory, "test"));
     }
 
     private Map<String, Path> copyAllFilesToTemp() throws IOException {
