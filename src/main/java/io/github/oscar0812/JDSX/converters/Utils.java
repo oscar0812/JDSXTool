@@ -46,6 +46,15 @@ class Utils {
         }
     }
 
+    public static boolean isDirectoryEmpty(Path path) throws IOException {
+        if (Files.exists(path) && Files.isDirectory(path)) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+                return !stream.iterator().hasNext(); // Returns true if empty
+            }
+        }
+        return false; // Path does not exist or is not a directory
+    }
+
     /**
      * Creates a temporary directory for use in file operations.
      * The directory is automatically scheduled for deletion when the JVM exits.

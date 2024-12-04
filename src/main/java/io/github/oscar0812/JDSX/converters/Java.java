@@ -67,6 +67,10 @@ public class Java {
             throw new IOException("Compilation process was interrupted", e);
         }
 
+        if(Utils.isDirectoryEmpty(classOutputDir)) {
+            throw new IOException("The compilation did not generate files");
+        }
+
         return classOutputDir;
     }
 
