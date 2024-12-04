@@ -61,7 +61,7 @@ public class JavaTest {
                 .class public LTestClass;
                 .super Ljava/lang/Object;
                 .source "TestClass.java"
-
+                
                 .method public constructor <init>()V
                   .registers 1
                   .prologue
@@ -69,7 +69,7 @@ public class JavaTest {
                     invoke-direct { p0 }, Ljava/lang/Object;-><init>()V
                     return-void
                 .end method
-
+                
                 .method public static main([Ljava/lang/String;)V
                   .registers 3
                   .prologue
@@ -80,6 +80,38 @@ public class JavaTest {
                   .line 4
                     return-void
                 .end method""";
+
+        String expectedNormalized = expectedSmali.replaceAll("\r\n|\r|\n", "\n").trim();
+        String actualNormalized = Utils.readFileToString(smaliFile).replaceAll("\r\n|\r|\n", "\n").trim();
+        assertEquals(expectedNormalized, actualNormalized);
+    }
+
+    @Test
+    public void testConvertJavaToSmali_WithPackage_Success() throws Exception {
+        Path smaliDir = Java.convertJavaToSmali("package com.example.demo;\n" +
+                "\n" +
+                "    public class HelloWorld {\n" +
+                "    }");
+        assertNotNull(smaliDir);
+
+        Path[] smaliFiles = Utils.getFiles(smaliDir, ".smali");
+        assertTrue(smaliFiles.length > 0);
+
+        Path smaliFile = smaliFiles[0];
+        assertTrue(smaliFile.toString().endsWith(".smali"));
+
+        String expectedSmali = """
+               .class public Lcom/example/demo/HelloWorld;
+               .super Ljava/lang/Object;
+               .source "HelloWorld.java"
+    
+               .method public constructor <init>()V
+                 .registers 1
+                 .prologue
+                 .line 3
+                   invoke-direct { p0 }, Ljava/lang/Object;-><init>()V
+                   return-void
+               .end method""";
 
         String expectedNormalized = expectedSmali.replaceAll("\r\n|\r|\n", "\n").trim();
         String actualNormalized = Utils.readFileToString(smaliFile).replaceAll("\r\n|\r|\n", "\n").trim();
@@ -165,7 +197,7 @@ public class JavaTest {
     @Test
     public void testConvertJavaToSmali_NullCode() {
         assertThrows(IllegalArgumentException.class, () -> {
-            Java.convertJavaToSmali((String)null);
+            Java.convertJavaToSmali((String) null);
         });
     }
 }

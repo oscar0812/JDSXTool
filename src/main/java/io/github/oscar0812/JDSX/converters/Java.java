@@ -67,12 +67,6 @@ public class Java {
             throw new IOException("Compilation process was interrupted", e);
         }
 
-        Path[] createdClasses = Utils.getFiles(classOutputDir, ".class");
-
-        if (createdClasses.length == 0) {
-            throw new IOException("Failed to compile Java to .class files");
-        }
-
         return classOutputDir;
     }
 

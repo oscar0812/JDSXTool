@@ -7,17 +7,6 @@ if len(sys.argv) > 1:
 else:
     new_version = input("Enter the new version number (e.g., 1.0.2): ")
 
-with open("build.gradle", "r") as file:
-    content = file.read()
-
-# Use regex to replace all occurrences of version = '...'
-content = re.sub(r"version\s*=\s*'.*'", f"version = '{new_version}'", content)
-
-with open("build.gradle", "w") as file:
-    file.write(content)
-
-print(f"All instances of version updated to {new_version}.")
-
 try:
     with open("gradle.properties", "r") as file:
         properties_content = file.read()
