@@ -80,7 +80,10 @@ public class JavaTest {
                   .line 4
                     return-void
                 .end method""";
-        assertEquals(expectedSmali, Utils.readFileToString(smaliFile));
+
+        String expectedNormalized = expectedSmali.replaceAll("\r\n|\r|\n", "\n").trim();
+        String actualNormalized = Utils.readFileToString(smaliFile).replaceAll("\r\n|\r|\n", "\n").trim();
+        assertEquals(expectedNormalized, actualNormalized);
     }
 
     @Test

@@ -21,7 +21,7 @@ public class Java {
     /**
      * Compiles a given Java file into .class files and stores them in a specified temporary directory.
      *
-     * @param javaFile  the path to the Java source file to be compiled
+     * @param javaFile the path to the Java source file to be compiled
      * @return the directory where the compiled .class files are stored
      * @throws IOException           if an I/O error occurs during compilation or file management
      * @throws IllegalStateException if the Java compiler is not available
@@ -43,32 +43,36 @@ public class Java {
     public static Path compileJavaToClass(Path javaFile, Path outputDir) throws IOException {
         Utils.validateFilePath(javaFile, "Java path");
 
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        if (compiler == null) {
-            throw new IllegalStateException("Java Compiler not available. Ensure you are running with a JDK.");
-        }
-
-        // Create a subfolder for the compiled .class files
         Path classOutputDir = outputDir.resolve("out");
         if (Files.notExists(classOutputDir)) {
             Files.createDirectories(classOutputDir);
         }
 
-        StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
-        fileManager.setLocation(javax.tools.StandardLocation.CLASS_OUTPUT, List.of(classOutputDir.toFile()));
+        ProcessBuilder processBuilder = new ProcessBuilder(
+                "javac",
+                "-d", classOutputDir.toString(),
+                javaFile.toString()
+        );
+        processBuilder.redirectErrorStream(true);
+        processBuilder.directory(outputDir.toFile());
 
-        Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromPaths(Collections.singletonList(javaFile));
-        boolean success = compiler.getTask(null, fileManager, null, null, null, compilationUnits).call();
-
-        fileManager.close();
+        Process process = processBuilder.start();
+        try {
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new IOException("javac compilation failed with exit code " + exitCode);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Compilation process was interrupted", e);
+        }
 
         Path[] createdClasses = Utils.getFiles(classOutputDir, ".class");
 
-        if (!success || createdClasses.length == 0) {
+        if (createdClasses.length == 0) {
             throw new IOException("Failed to compile Java to .class files");
         }
 
-        // Instead of returning the .class files, return the output directory
         return classOutputDir;
     }
 
@@ -77,7 +81,7 @@ public class Java {
      *
      * @param javaCode the Java code to be written to the file
      * @return the path to the created temporary Java file
-     * @throws IOException if an I/O error occurs during file creation or writing
+     * @throws IOException              if an I/O error occurs during file creation or writing
      * @throws IllegalArgumentException if the provided Java code is null or empty
      */
     private static Path createTempJavaFile(String javaCode) throws IOException {

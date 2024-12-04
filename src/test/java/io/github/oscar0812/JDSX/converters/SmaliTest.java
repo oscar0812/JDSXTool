@@ -175,6 +175,8 @@ public class SmaliTest {
                    }
                 }""";
 
-        assertEquals(expectedJavaCode, Utils.readFileToString(javaPath));
+        String expectedNormalized = expectedJavaCode.replaceAll("\r\n|\r|\n", "\n").trim();
+        String actualNormalized = Utils.readFileToString(javaPath).replaceAll("\r\n|\r|\n", "\n").trim();
+        assertEquals(expectedNormalized, actualNormalized);
     }
 }
