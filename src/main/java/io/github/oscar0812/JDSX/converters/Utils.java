@@ -104,9 +104,13 @@ class Utils {
      */
     public static Path[] getFiles(Path dirPath, String extension) throws IOException {
         List<Path> filePaths = new ArrayList<>();
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(dirPath, "*" + extension)) {
-            for (Path entry : stream) {
-                filePaths.add(entry);
+
+        if (Files.isDirectory(dirPath)) {
+            // Fetch all files in the directory
+            try (var stream = Files.walk(dirPath)) {
+                stream.filter(Files::isRegularFile)
+                        .filter(file -> file.toString().endsWith(extension))
+                        .forEach(filePaths::add);
             }
         }
         return filePaths.toArray(new Path[0]);

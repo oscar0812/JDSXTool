@@ -179,4 +179,50 @@ public class SmaliTest {
         String actualNormalized = Utils.readFileToString(javaPath).replaceAll("\r\n|\r|\n", "\n").trim();
         assertEquals(expectedNormalized, actualNormalized);
     }
+
+    @Test
+    public void testConvertSmaliToJava_ExternalSynthetic_Success() throws Exception {
+        Path javaDir = Smali.convertSmaliToJava("""
+                .class public final synthetic Lcom/example/Main$$ExternalSyntheticLambda0;
+                .super Ljava/lang/Object;
+                .implements Ljava/util/function/Function;
+                .source "D8$$SyntheticClass"
+                
+                .method public synthetic constructor <init>()V
+                  .registers 1
+                  .line 0
+                    invoke-direct { p0 }, Ljava/lang/Object;-><init>()V
+                    return-void
+                .end method
+                
+                .method public final apply(Ljava/lang/Object;)Ljava/lang/Object;
+                  .registers 2
+                  .line 0
+                    check-cast p1, Ljava/util/List;
+                    invoke-static { p1 }, Lcom/example/Main;->lambda$main$0(Ljava/util/List;)Ljava/util/stream/Stream;
+                    move-result-object p1
+                    return-object p1
+                .end method""");
+        assertNotNull(javaDir);
+        assertTrue(Files.exists(javaDir));
+
+        Path[] javaPaths = Utils.getFiles(javaDir, ".java");
+        Path javaPath = javaPaths[0];
+
+        String expectedJavaCode = """
+                package com.example;
+                
+                import java.util.List;
+                import java.util.function.Function;
+                
+                public final class Main$$ExternalSyntheticLambda0 implements Function {
+                   public final Object apply(Object var1) {
+                      return Main.lambda$main$0((List)var1);
+                   }
+                }""";
+
+        String expectedNormalized = expectedJavaCode.replaceAll("\r\n|\r|\n", "\n").trim();
+        String actualNormalized = Utils.readFileToString(javaPath).replaceAll("\r\n|\r|\n", "\n").trim();
+        assertEquals(expectedNormalized, actualNormalized);
+    }
 }

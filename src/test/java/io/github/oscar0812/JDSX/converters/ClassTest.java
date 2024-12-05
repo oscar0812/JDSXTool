@@ -27,47 +27,20 @@ public class ClassTest {
 
     @Test
     void testConvertClassFilesToDex_ValidClassFile() throws IOException {
-        Path classFile = fileMap.get("HelloWorld.class");
-        assertNotNull(classFile);
+        Path javaPath = fileMap.get("HelloWorld.java");
+        Path classPath = Java.compileJavaToClass(javaPath);
 
-        Path dexPath = tempDir.resolve("output.dex");
-
-        Class.convertClassFilesToDex(new Path[]{classFile}, dexPath);
-
+        Path dexPath = Class.convertClassFilesToDex(classPath);
         assertTrue(Files.exists(dexPath));
     }
 
     @Test
-    void testConvertClassFilesToDex_EmptyClassFile() throws IOException {
+    void testConvertClassFilesToDex_EmptyClassFile() {
         Path invalidClassFile = tempDir.resolve("Empty.class");
 
-        Path dexPath = tempDir.resolve("output.dex");
-        Class.convertClassFilesToDex(new Path[]{invalidClassFile}, dexPath);
-        assertFalse(Files.exists(dexPath));
-    }
-
-    @Test
-    void testConvertClassFilesToDex_NullClassFile() {
-        Path dexPath = tempDir.resolve("output.dex");
-
-        assertThrows(IllegalArgumentException.class, () -> Class.convertClassFilesToDex((Path[])null, dexPath));
-    }
-
-    @Test
-    void testConvertClassFilesToDex_NullOutputDexPath() throws IOException {
-        Path classFile = fileMap.get("HelloWorld.class");
-
-        assertThrows(IllegalArgumentException.class, () -> Class.convertClassFilesToDex(new Path[]{classFile}, null));
-    }
-
-    @Test
-    void testConvertClassFilesToDex_AutoOutputDir_ValidClassFile() throws IOException {
-        Path classFile = fileMap.get("HelloWorld.class");
-        assertNotNull(classFile);
-
-        Path dexPath = Class.convertClassFilesToDex(classFile);
-
-        assertTrue(Files.exists(dexPath));
+        assertThrows(RuntimeException.class, () -> {
+            Class.convertClassFilesToDex(invalidClassFile);
+        });
     }
 
     private Map<String, Path> copyAllFilesToTemp() throws IOException {

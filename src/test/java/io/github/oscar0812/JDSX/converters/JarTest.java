@@ -1,5 +1,9 @@
 package io.github.oscar0812.JDSX.converters;
 
+import com.android.tools.r8.CompilationFailedException;
+import com.android.tools.r8.D8;
+import com.android.tools.r8.D8Command;
+import com.android.tools.r8.OutputMode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,20 +32,6 @@ class JarTest {
         fileMap = copyAllFilesToTemp();
     }
 
-    @AfterEach
-    void tearDown() throws IOException {
-        if (tempDir != null) {
-            Files.walk(tempDir)
-                    .sorted(Comparator.reverseOrder())
-                    .forEach(path -> {
-                        try {
-                            Files.delete(path);
-                        } catch (IOException ignored) {
-                        }
-                    });
-        }
-    }
-
     @Test
     void testExtractJar_ValidJarFile() throws IOException {
         Path jarFile = fileMap.get("test.jar");
@@ -55,7 +45,7 @@ class JarTest {
 
     @Test
     void testExtractJar_InvalidJarFile() {
-        Path invalidJarFile = tempDir.resolve("invalid.jar");
+        Path invalidJarFile = fileMap.get("invalid.jar");
 
         assertThrows(IOException.class, () -> Jar.extractJar(invalidJarFile));
     }
@@ -67,7 +57,7 @@ class JarTest {
 
     @Test
     void testExtractJar_EmptyJarFile() {
-        Path emptyJarFile = tempDir.resolve("empty.jar");
+        Path emptyJarFile = fileMap.get("empty.jar");
 
         assertThrows(ZipException.class, () -> Jar.extractJar(emptyJarFile));
     }
@@ -92,14 +82,14 @@ class JarTest {
 
     @Test
     void testConvertClassJarToJava_EmptyJar() {
-        Path invalidJarFile = tempDir.resolve("empty.jar");
+        Path invalidJarFile = fileMap.get("empty.jar");
 
         assertThrows(IOException.class, () -> Jar.convertClassJarToJava(invalidJarFile));
     }
 
     @Test
     void testConvertClassJarToJava_MissingJar() {
-        Path invalidJarFile = tempDir.resolve("invalid.jar");
+        Path invalidJarFile = fileMap.get("invalid.jar");
 
         assertThrows(IOException.class, () -> Jar.convertClassJarToJava(invalidJarFile));
     }
@@ -117,6 +107,40 @@ class JarTest {
         Path extractedDir = Jar.extractJar(jarFile);
 
         assertTrue(Files.exists(extractedDir));
+    }
+
+    @Test
+    void convertJarToDexD8() throws CompilationFailedException, IOException {
+        Path jarPath = fileMap.get("test.jar");
+        Path outputDexDir = Files.createDirectories(jarPath.getParent().resolve("new_folder").resolve("2"));
+
+        D8Command command = D8Command.builder()
+                .addProgramFiles(jarPath)
+                .setOutput(outputDexDir, OutputMode.DexIndexed)
+                .setMinApiLevel(21)
+                .build();
+
+        // Run D8 to perform the conversion
+        D8.run(command);
+
+        System.out.println("Conversion successful. DEX files saved to: " + outputDexDir);
+    }
+
+    @Test
+    void convertClassToDexD8_desugar() throws CompilationFailedException, IOException {
+        Path classPath = fileMap.get("HelloWorld.class");
+        Path outputDexDir = Files.createDirectories(classPath.getParent().resolve("new_folder").resolve("2"));
+
+        D8Command command = D8Command.builder()
+                .addProgramFiles(classPath)
+                .setOutput(outputDexDir, OutputMode.DexIndexed)
+                .setMinApiLevel(21)
+                .build();
+
+        // Run D8 to perform the conversion
+        D8.run(command);
+
+        System.out.println("Conversion successful. DEX files saved to: " + outputDexDir);
     }
 
     private Map<String, Path> copyAllFilesToTemp() throws IOException {

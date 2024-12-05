@@ -14,6 +14,7 @@ java {
 
 repositories {
     mavenCentral()
+    google()
     maven { url 'https://jitpack.io' }
 }
 
@@ -32,6 +33,8 @@ dependencies {
     implementation group: 'de.femtopedia.dex2jar', name: 'dex-tools', version: project.dex2jarVersion
     implementation group: 'de.femtopedia.dex2jar', name: 'dex-translator', version: project.dex2jarVersion
     implementation group: 'de.femtopedia.dex2jar', name: 'dex-writer', version: project.dex2jarVersion
+
+    implementation("com.android.tools:r8:8.5.35")
 
     implementation group: 'org.jboss.windup.decompiler', name: 'decompiler-fernflower', version: project.fernflowerVersion
 

@@ -19,11 +19,12 @@ public class JavaTest {
     public void setUp() throws IOException {
         tempDir = Files.createTempDirectory("javaTest");
         javaFile = tempDir.resolve("TestClass.java");
-        javaCode = "public class TestClass {\n" +
-                "    public static void main(String[] args) {\n" +
-                "        System.out.println(\"Hello, World!\");\n" +
-                "    }\n" +
-                "}";
+        javaCode = """
+                public class TestClass {
+                    public static void main(String[] args) {
+                        System.out.println("Hello, World!");
+                    }
+                }""";
         Files.write(javaFile, javaCode.getBytes());
     }
 
@@ -52,7 +53,7 @@ public class JavaTest {
         assertNotNull(smaliDir);
 
         Path[] smaliFiles = Utils.getFiles(smaliDir, ".smali");
-        assertTrue(smaliFiles.length > 0);
+        assertEquals(1, smaliFiles.length);
 
         Path smaliFile = smaliFiles[0];
         assertTrue(smaliFile.toString().endsWith(".smali"));
@@ -64,19 +65,17 @@ public class JavaTest {
                 
                 .method public constructor <init>()V
                   .registers 1
-                  .prologue
                   .line 1
                     invoke-direct { p0 }, Ljava/lang/Object;-><init>()V
                     return-void
                 .end method
                 
                 .method public static main([Ljava/lang/String;)V
-                  .registers 3
-                  .prologue
+                  .registers 2
                   .line 3
-                    sget-object v0, Ljava/lang/System;->out:Ljava/io/PrintStream;
-                    const-string v1, "Hello, World!"
-                    invoke-virtual { v0, v1 }, Ljava/io/PrintStream;->println(Ljava/lang/String;)V
+                    sget-object p0, Ljava/lang/System;->out:Ljava/io/PrintStream;
+                    const-string v0, "Hello, World!"
+                    invoke-virtual { p0, v0 }, Ljava/io/PrintStream;->println(Ljava/lang/String;)V
                   .line 4
                     return-void
                 .end method""";
@@ -88,14 +87,15 @@ public class JavaTest {
 
     @Test
     public void testConvertJavaToSmali_WithPackage_Success() throws Exception {
-        Path smaliDir = Java.convertJavaToSmali("package com.example.demo;\n" +
-                "\n" +
-                "    public class HelloWorld {\n" +
-                "    }");
+        Path smaliDir = Java.convertJavaToSmali("""
+                package com.example.demo;
+            
+                public class HelloWorld {
+                }""");
         assertNotNull(smaliDir);
 
         Path[] smaliFiles = Utils.getFiles(smaliDir, ".smali");
-        assertTrue(smaliFiles.length > 0);
+        assertEquals(1, smaliFiles.length);
 
         Path smaliFile = smaliFiles[0];
         assertTrue(smaliFile.toString().endsWith(".smali"));
@@ -107,7 +107,6 @@ public class JavaTest {
     
                .method public constructor <init>()V
                  .registers 1
-                 .prologue
                  .line 3
                    invoke-direct { p0 }, Ljava/lang/Object;-><init>()V
                    return-void
@@ -116,6 +115,123 @@ public class JavaTest {
         String expectedNormalized = expectedSmali.replaceAll("\r\n|\r|\n", "\n").trim();
         String actualNormalized = Utils.readFileToString(smaliFile).replaceAll("\r\n|\r|\n", "\n").trim();
         assertEquals(expectedNormalized, actualNormalized);
+    }
+
+
+    @Test
+    public void testConvertJavaToSmali_UsingLambda_Success() throws Exception {
+        Path smaliDir = Java.convertJavaToSmali("""
+                package com.example;
+                
+                import java.util.Arrays;
+                import java.util.List;
+                
+                public class Main {
+                    public static void main(String[] args) {
+                
+                        List<String> type = Arrays.asList(Arrays.asList(" ")).stream()
+                                .flatMap(a -> a.stream()).toList();
+                
+                        System.out.println(type);
+                
+                        System.out.println("HELLO WORLD2");
+                    }
+                }""");
+        assertNotNull(smaliDir);
+
+        Path[] smaliFiles = Utils.getFiles(smaliDir, ".smali");
+        assertEquals(2, smaliFiles.length);
+
+        Path smaliFile1 = smaliFiles[0];
+        assertTrue(smaliFile1.toString().endsWith(".smali"));
+
+        String expectedSmali1 = """
+                .class public final synthetic Lcom/example/Main$$ExternalSyntheticLambda0;
+                .super Ljava/lang/Object;
+                .implements Ljava/util/function/Function;
+                .source "D8$$SyntheticClass"
+                
+                .method public synthetic constructor <init>()V
+                  .registers 1
+                  .line 0
+                    invoke-direct { p0 }, Ljava/lang/Object;-><init>()V
+                    return-void
+                .end method
+                
+                .method public final apply(Ljava/lang/Object;)Ljava/lang/Object;
+                  .registers 2
+                  .line 0
+                    check-cast p1, Ljava/util/List;
+                    invoke-static { p1 }, Lcom/example/Main;->lambda$main$0(Ljava/util/List;)Ljava/util/stream/Stream;
+                    move-result-object p1
+                    return-object p1
+                .end method""";
+
+        String expectedNormalized1 = expectedSmali1.replaceAll("\r\n|\r|\n", "\n").trim();
+        String actualNormalized1 = Utils.readFileToString(smaliFile1).replaceAll("\r\n|\r|\n", "\n").trim();
+        assertEquals(expectedNormalized1, actualNormalized1);
+
+        // ==== the second smali
+        Path smaliFile2 = smaliFiles[1];
+        assertTrue(smaliFile2.toString().endsWith(".smali"));
+
+        String expectedSmali2 = """
+                .class public Lcom/example/Main;
+                .super Ljava/lang/Object;
+                .source "Main.java"
+                
+                .method public constructor <init>()V
+                  .registers 1
+                  .line 6
+                    invoke-direct { p0 }, Ljava/lang/Object;-><init>()V
+                    return-void
+                .end method
+                
+                .method static synthetic lambda$main$0(Ljava/util/List;)Ljava/util/stream/Stream;
+                  .registers 1
+                  .line 10
+                    invoke-interface { p0 }, Ljava/util/List;->stream()Ljava/util/stream/Stream;
+                    move-result-object p0
+                    return-object p0
+                .end method
+                
+                .method public static main([Ljava/lang/String;)V
+                  .registers 4
+                  .line 9
+                    const/4 p0, 1
+                    new-array v0, p0, [Ljava/util/List;
+                    new-array p0, p0, [Ljava/lang/String;
+                    const-string v1, " "
+                    const/4 v2, 0
+                    aput-object v1, p0, v2
+                    invoke-static { p0 }, Ljava/util/Arrays;->asList([Ljava/lang/Object;)Ljava/util/List;
+                    move-result-object p0
+                    aput-object p0, v0, v2
+                    invoke-static { v0 }, Ljava/util/Arrays;->asList([Ljava/lang/Object;)Ljava/util/List;
+                    move-result-object p0
+                    invoke-interface { p0 }, Ljava/util/List;->stream()Ljava/util/stream/Stream;
+                    move-result-object p0
+                    new-instance v0, Lcom/example/Main$$ExternalSyntheticLambda0;
+                    invoke-direct { v0 }, Lcom/example/Main$$ExternalSyntheticLambda0;-><init>()V
+                  .line 10
+                    invoke-interface { p0, v0 }, Ljava/util/stream/Stream;->flatMap(Ljava/util/function/Function;)Ljava/util/stream/Stream;
+                    move-result-object p0
+                    invoke-interface { p0 }, Ljava/util/stream/Stream;->toList()Ljava/util/List;
+                    move-result-object p0
+                  .line 12
+                    sget-object v0, Ljava/lang/System;->out:Ljava/io/PrintStream;
+                    invoke-virtual { v0, p0 }, Ljava/io/PrintStream;->println(Ljava/lang/Object;)V
+                  .line 14
+                    sget-object p0, Ljava/lang/System;->out:Ljava/io/PrintStream;
+                    const-string v0, "HELLO WORLD2"
+                    invoke-virtual { p0, v0 }, Ljava/io/PrintStream;->println(Ljava/lang/String;)V
+                  .line 15
+                    return-void
+                .end method""";
+
+        String expectedNormalized2 = expectedSmali2.replaceAll("\r\n|\r|\n", "\n").trim();
+        String actualNormalized2 = Utils.readFileToString(smaliFile2).replaceAll("\r\n|\r|\n", "\n").trim();
+        assertEquals(expectedNormalized2, actualNormalized2);
     }
 
     @Test
