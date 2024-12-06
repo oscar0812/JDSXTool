@@ -25,8 +25,8 @@ public class Jar {
      * @throws IOException if an I/O error occurs during extraction
      */
     public static Path extractJar(Path jarPath) throws IOException {
-        Utils.validateFilePath(jarPath, "JAR path");
-        Path outputDir = Utils.getSiblingPath(jarPath, "_extract");
+        FileUtils.validateFilePath(jarPath, "JAR path");
+        Path outputDir = FileUtils.getSiblingDirectory(jarPath, "jar_extract");
         Files.createDirectories(outputDir);
         extractJar(jarPath, outputDir);
 
@@ -43,7 +43,7 @@ public class Jar {
      * @throws SecurityException if a JAR entry is found with a relative path outside the extraction directory
      */
     public static void extractJar(Path jarPath, Path destinationDir) throws IOException {
-        Utils.validateFilePath(jarPath, "JAR path");
+        FileUtils.validateFilePath(jarPath, "JAR path");
         if (destinationDir == null) {
             throw new IllegalArgumentException("Destination directory cannot be null.");
         }
@@ -78,13 +78,13 @@ public class Jar {
      * @throws IOException if an I/O error occurs during decompiling, file extraction, or JAR creation
      */
     public static Path convertClassJarToJavaJar(Path jarPath) throws IOException {
-        Utils.validateFilePath(jarPath, "JAR path");
+        FileUtils.validateFilePath(jarPath, "JAR path");
 
         if (!isClassJar(jarPath)) {
             throw new IllegalArgumentException("The provided JAR file does not contain `.class` files.");
         }
 
-        Path outputDir = Utils.getSiblingPath(jarPath, "_java_jar");
+        Path outputDir = FileUtils.getSiblingDirectory(jarPath, "java_jar_out");
         Files.createDirectories(outputDir);
 
         // Decompile the class files to Java source
@@ -109,7 +109,7 @@ public class Jar {
      */
     public static Path convertClassJarToJava(Path jarPath) throws IOException {
         Path decompiledJar = Jar.convertClassJarToJavaJar(jarPath);
-        Path outputDir = Utils.getSiblingPath(jarPath, "_java");
+        Path outputDir = FileUtils.getSiblingDirectory(jarPath, "java_out");
         Jar.extractJar(decompiledJar, outputDir);
         return outputDir;
     }

@@ -126,25 +126,8 @@ class JarTest {
         System.out.println("Conversion successful. DEX files saved to: " + outputDexDir);
     }
 
-    @Test
-    void convertClassToDexD8_desugar() throws CompilationFailedException, IOException {
-        Path classPath = fileMap.get("HelloWorld.class");
-        Path outputDexDir = Files.createDirectories(classPath.getParent().resolve("new_folder").resolve("2"));
-
-        D8Command command = D8Command.builder()
-                .addProgramFiles(classPath)
-                .setOutput(outputDexDir, OutputMode.DexIndexed)
-                .setMinApiLevel(21)
-                .build();
-
-        // Run D8 to perform the conversion
-        D8.run(command);
-
-        System.out.println("Conversion successful. DEX files saved to: " + outputDexDir);
-    }
-
     private Map<String, Path> copyAllFilesToTemp() throws IOException {
-        Path resourceDir = Paths.get("src", "test", "resources", "files");
+        Path resourceDir = Paths.get("src/test/resources/files");
         Map<String, Path> fileMap = new HashMap<>();
 
         if (Files.exists(resourceDir) && Files.isDirectory(resourceDir)) {

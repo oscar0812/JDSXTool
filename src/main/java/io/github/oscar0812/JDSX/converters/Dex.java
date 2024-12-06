@@ -22,9 +22,9 @@ public class Dex {
      * @throws IOException              if an error occurs while accessing the file system
      */
     public static Path convertDexToClassJar(Path dexPath) throws IOException {
-        Utils.validateFilePath(dexPath, "Dex path");
+        FileUtils.validateFilePath(dexPath, "Dex path");
 
-        Path jarPath = Utils.getSiblingPath(dexPath, ".jar");
+        Path jarPath = FileUtils.getSiblingPath(dexPath, ".jar");
         return convertDexToClassJar(dexPath, jarPath);
     }
 
@@ -39,7 +39,7 @@ public class Dex {
      * @throws IOException              if an error occurs while accessing the file system
      */
     public static Path convertDexToClassJar(Path dexPath, Path jarPath) throws IOException {
-        Utils.validateFilePath(dexPath, "Dex path");
+        FileUtils.validateFilePath(dexPath, "Dex path");
 
         if (jarPath == null) {
             throw new IllegalArgumentException("JAR output path cannot be null.");
@@ -65,10 +65,10 @@ public class Dex {
      * @throws IOException              if an error occurs while accessing the file system
      */
     public static Path convertDexToSmali(Path dexFilePath) throws IOException {
-        Utils.validateFilePath(dexFilePath, "Dex path");
+        FileUtils.validateFilePath(dexFilePath, "Dex path");
 
         // Create a sibling directory for the Smali files
-        Path outputDir = Utils.getSiblingPath(dexFilePath, "_smali");
+        Path outputDir = FileUtils.getSiblingDirectory(dexFilePath, "smali_out");
         Files.createDirectories(outputDir);
 
         return convertDexToSmali(dexFilePath, outputDir);
@@ -85,7 +85,7 @@ public class Dex {
      * @throws IOException              if an error occurs while accessing the file system
      */
     public static Path convertDexToSmali(Path dexFilePath, Path outputDir) throws IOException {
-        Utils.validateFilePath(dexFilePath, "Dex path");
+        FileUtils.validateFilePath(dexFilePath, "Dex path");
 
         if (outputDir == null) {
             throw new IllegalArgumentException("Output directory path cannot be null or empty");

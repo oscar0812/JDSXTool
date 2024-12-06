@@ -1,18 +1,17 @@
 package io.github.oscar0812.JDSX.converters;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
  * A utility class providing helper methods for file manipulation and validation
  * used in the context of Java-to-Smali conversion.
  */
-class Utils {
+public class FileUtils {
 
     /**
      * Generates a sibling path for the given file path with the specified file extension.
@@ -26,6 +25,19 @@ class Utils {
     public static Path getSiblingPath(Path path, String extension) {
         String fileNameWithoutExt = path.getFileName().toString().replaceFirst("[.][^.]+$", "");
         return path.toAbsolutePath().getParent().resolve(fileNameWithoutExt + extension);
+    }
+
+    /**
+     * Generates a sibling directory for the given file path
+     * The new path is in the same parent directory as the original path
+     *
+     * @param path the original file path
+     * @param directoryName the directory name
+     * @return the generated sibling directory
+     * @throws IllegalArgumentException if the provided path is invalid or null
+     */
+    public static Path getSiblingDirectory(Path path, String directoryName) {
+        return path.toAbsolutePath().getParent().resolve(directoryName);
     }
 
     /**
@@ -63,7 +75,7 @@ class Utils {
      * @throws IOException if an I/O error occurs during directory creation
      */
     public static Path createTempDirectory() throws IOException {
-        return createTempDirectory("JavaToSmali");
+        return createTempDirectory("JDSXTool");
     }
 
     /**
@@ -128,5 +140,17 @@ class Utils {
         List<String> lines = Files.readAllLines(path);
         return lines.stream()
                 .collect(Collectors.joining(System.lineSeparator()));  // Joins lines with the system's line separator
+    }
+
+    public static Path moveToTempDirIfNeeded(Path path) throws IOException {
+        Path systemTempDir = Paths.get(System.getProperty("java.io.tmpdir"));
+
+        if(path.toAbsolutePath().startsWith(systemTempDir)) {
+            // already in systemTempDir
+            return path;
+        }
+
+        Path newPath = createTempDirectory().resolve(path.getFileName());
+        return Files.copy(path.toAbsolutePath(), newPath.toAbsolutePath(), StandardCopyOption.REPLACE_EXISTING);
     }
 }

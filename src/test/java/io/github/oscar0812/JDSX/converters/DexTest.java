@@ -136,13 +136,10 @@ class DexTest {
         Path dexFile = fileMap.get("test.dex");
         assertNotNull(dexFile);
 
-        // Expected sibling directory for Smali files
-        Path expectedOutputDir = dexFile.resolveSibling("test_smali");
+        Path expectedOutputDir = dexFile.resolveSibling("smali_out");
 
-        // Call the method to test
         Dex.convertDexToSmali(dexFile);
 
-        // Assert the output directory is created and contains files
         assertTrue(Files.isDirectory(expectedOutputDir));
         assertTrue(Files.list(expectedOutputDir).findAny().isPresent());
     }
@@ -164,7 +161,7 @@ class DexTest {
     }
 
     private Map<String, Path> copyAllFilesToTemp() throws IOException {
-        Path resourceDir = Paths.get("src", "test", "resources", "files");
+        Path resourceDir = Paths.get("src/test/resources/files");
         Map<String, Path> fileMap = new HashMap<>();
 
         if (Files.exists(resourceDir) && Files.isDirectory(resourceDir)) {

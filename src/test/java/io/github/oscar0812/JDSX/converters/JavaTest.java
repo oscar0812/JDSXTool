@@ -33,7 +33,7 @@ public class JavaTest {
         Path classesDir = Java.compileJavaToClass(javaFile, tempDir);
         assertNotNull(classesDir);
 
-        Path[] classFiles = Utils.getFiles(classesDir);
+        Path[] classFiles = FileUtils.getFiles(classesDir);
         assertTrue(classFiles.length > 0);
         Path classFile = classFiles[0];
         assertTrue(classFile.toString().endsWith(".class"));
@@ -52,7 +52,7 @@ public class JavaTest {
         Path smaliDir = Java.convertJavaToSmali(javaCode);
         assertNotNull(smaliDir);
 
-        Path[] smaliFiles = Utils.getFiles(smaliDir, ".smali");
+        Path[] smaliFiles = FileUtils.getFiles(smaliDir, ".smali");
         assertEquals(1, smaliFiles.length);
 
         Path smaliFile = smaliFiles[0];
@@ -81,7 +81,7 @@ public class JavaTest {
                 .end method""";
 
         String expectedNormalized = expectedSmali.replaceAll("\r\n|\r|\n", "\n").trim();
-        String actualNormalized = Utils.readFileToString(smaliFile).replaceAll("\r\n|\r|\n", "\n").trim();
+        String actualNormalized = FileUtils.readFileToString(smaliFile).replaceAll("\r\n|\r|\n", "\n").trim();
         assertEquals(expectedNormalized, actualNormalized);
     }
 
@@ -94,7 +94,7 @@ public class JavaTest {
                 }""");
         assertNotNull(smaliDir);
 
-        Path[] smaliFiles = Utils.getFiles(smaliDir, ".smali");
+        Path[] smaliFiles = FileUtils.getFiles(smaliDir, ".smali");
         assertEquals(1, smaliFiles.length);
 
         Path smaliFile = smaliFiles[0];
@@ -113,7 +113,7 @@ public class JavaTest {
                .end method""";
 
         String expectedNormalized = expectedSmali.replaceAll("\r\n|\r|\n", "\n").trim();
-        String actualNormalized = Utils.readFileToString(smaliFile).replaceAll("\r\n|\r|\n", "\n").trim();
+        String actualNormalized = FileUtils.readFileToString(smaliFile).replaceAll("\r\n|\r|\n", "\n").trim();
         assertEquals(expectedNormalized, actualNormalized);
     }
 
@@ -139,7 +139,7 @@ public class JavaTest {
                 }""");
         assertNotNull(smaliDir);
 
-        Path[] smaliFiles = Utils.getFiles(smaliDir, ".smali");
+        Path[] smaliFiles = FileUtils.getFiles(smaliDir, ".smali");
         assertEquals(2, smaliFiles.length);
 
         Path smaliFile1 = smaliFiles[0];
@@ -168,7 +168,7 @@ public class JavaTest {
                 .end method""";
 
         String expectedNormalized1 = expectedSmali1.replaceAll("\r\n|\r|\n", "\n").trim();
-        String actualNormalized1 = Utils.readFileToString(smaliFile1).replaceAll("\r\n|\r|\n", "\n").trim();
+        String actualNormalized1 = FileUtils.readFileToString(smaliFile1).replaceAll("\r\n|\r|\n", "\n").trim();
         assertEquals(expectedNormalized1, actualNormalized1);
 
         // ==== the second smali
@@ -230,7 +230,7 @@ public class JavaTest {
                 .end method""";
 
         String expectedNormalized2 = expectedSmali2.replaceAll("\r\n|\r|\n", "\n").trim();
-        String actualNormalized2 = Utils.readFileToString(smaliFile2).replaceAll("\r\n|\r|\n", "\n").trim();
+        String actualNormalized2 = FileUtils.readFileToString(smaliFile2).replaceAll("\r\n|\r|\n", "\n").trim();
         assertEquals(expectedNormalized2, actualNormalized2);
     }
 
@@ -295,7 +295,7 @@ public class JavaTest {
         Path classesDir = Java.compileJavaToClass(javaFile, tempDir);
         assertNotNull(classesDir);
 
-        Path[] classFiles = Utils.getFiles(classesDir);
+        Path[] classFiles = FileUtils.getFiles(classesDir);
         assertTrue(classFiles.length > 0);
         assertTrue(classFiles[0].toString().endsWith(".class"));
     }

@@ -23,7 +23,7 @@ public class Smali {
         if (smaliCode == null || smaliCode.isEmpty()) {
             throw new IllegalArgumentException("Smali code cannot be null or empty.");
         }
-        Path tempDir = Utils.createTempDirectory("smali_temp");
+        Path tempDir = FileUtils.createTempDirectory("smali_temp");
         Path smaliFile = tempDir.resolve("TempSmali.smali");
         Files.write(smaliFile, smaliCode.getBytes());
         return smaliFile;
@@ -39,7 +39,7 @@ public class Smali {
      */
     public static Path convertSmaliToDex(String smaliCode) throws IOException {
         Path smaliPath = createTempSmaliFile(smaliCode);
-        Path dexPath = Utils.getSiblingPath(smaliPath, ".dex");
+        Path dexPath = FileUtils.getSiblingPath(smaliPath, ".dex");
         return convertSmaliToDex(smaliPath, dexPath);
     }
 
@@ -68,7 +68,7 @@ public class Smali {
      * @throws IllegalArgumentException if the DEX output path is null
      */
     public static Path convertSmaliToDex(Path smaliPath, Path dexPath) throws IOException {
-        Utils.validateFilePath(smaliPath, "Smali path");
+        FileUtils.validateFilePath(smaliPath, "Smali path");
 
         if (dexPath == null) {
             throw new IllegalArgumentException("Dex output path cannot be null.");
@@ -92,8 +92,8 @@ public class Smali {
      * @throws IllegalArgumentException if the DEX output path is null
      */
     public static Path convertSmaliToDex(Path smaliPath) throws IOException {
-        Utils.validateFilePath(smaliPath, "Smali path");
-        Path dexPath = Utils.getSiblingPath(smaliPath, "output.dex");
+        FileUtils.validateFilePath(smaliPath, "Smali path");
+        Path dexPath = FileUtils.getSiblingPath(smaliPath, "output.dex");
         return convertSmaliToDex(smaliPath, dexPath);
     }
 

@@ -21,7 +21,7 @@ public class Java {
      * @throws IllegalStateException if the Java compiler is not available
      */
     public static Path compileJavaToClass(Path javaFile) throws IOException {
-        Path outputDir = Utils.getSiblingPath(javaFile, "compiled_classes");
+        Path outputDir = FileUtils.getSiblingDirectory(javaFile, "compiled_classes");
         return compileJavaToClass(javaFile, outputDir);
     }
 
@@ -35,7 +35,7 @@ public class Java {
      * @throws IllegalStateException if the Java compiler is not available
      */
     public static Path compileJavaToClass(Path javaFile, Path outputDir) throws IOException {
-        Utils.validateFilePath(javaFile, "Java path");
+        FileUtils.validateFilePath(javaFile, "Java path");
 
         Path classOutputDir = outputDir.resolve("out");
         if (Files.notExists(classOutputDir)) {
@@ -61,7 +61,7 @@ public class Java {
             throw new IOException("Compilation process was interrupted", e);
         }
 
-        if(Utils.isDirectoryEmpty(classOutputDir)) {
+        if(FileUtils.isDirectoryEmpty(classOutputDir)) {
             throw new IOException("The compilation did not generate files");
         }
 
@@ -86,7 +86,7 @@ public class Java {
             throw new IllegalArgumentException("Failed to determine class name from the provided Java code");
         }
 
-        Path tempDir = Utils.createTempDirectory("java_temp");
+        Path tempDir = FileUtils.createTempDirectory("java_temp");
         Path javaFilePath = tempDir.resolve(className + ".java");
         Files.write(javaFilePath, javaCode.getBytes());
         return javaFilePath;

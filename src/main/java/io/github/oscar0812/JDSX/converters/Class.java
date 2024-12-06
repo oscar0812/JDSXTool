@@ -8,6 +8,7 @@ import com.android.tools.r8.OutputMode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public class Class {
 
@@ -22,24 +23,30 @@ public class Class {
      * @throws IOException              if an error occurs while accessing the file system
      */
     public static Path convertClassFilesToDex(Path inputPath) throws IOException {
-        if(Files.isRegularFile(inputPath)) {
-            inputPath = inputPath.getParent();
+        inputPath = FileUtils.moveToTempDirIfNeeded(inputPath);
+
+        Path[] paths;
+        if (Files.isRegularFile(inputPath)) {
+            paths = new Path[]{inputPath};
+        } else {
+            paths = FileUtils.getFiles(inputPath, ".class");
         }
 
-        Path dexDir = Files.createDirectories(inputPath.resolve("r8_out"));
+        Path dexDir = Files.createDirectories(FileUtils.getSiblingDirectory(inputPath, "dex_out"));
+
         try {
-        D8Command command = D8Command.builder()
-                .addProgramFiles(Utils.getFiles(inputPath, ".class"))
-                .setOutput(dexDir, OutputMode.DexIndexed)
-                .build();
+            D8Command command = D8Command.builder()
+                    .addProgramFiles(paths)
+                    .setOutput(dexDir, OutputMode.DexIndexed)
+                    .build();
 
             D8.run(command);
         } catch (CompilationFailedException e) {
             throw new RuntimeException(e);
         }
 
-        Path[] outputDexPaths = Utils.getFiles(dexDir, ".dex");
-        if(outputDexPaths.length == 0) {
+        Path[] outputDexPaths = FileUtils.getFiles(dexDir, ".dex");
+        if (outputDexPaths.length == 0) {
             throw new IOException("Dex was not generated");
         }
 

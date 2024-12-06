@@ -35,8 +35,16 @@ public class ClassTest {
     }
 
     @Test
+    void testConvertClassFilesToDex_ValidClassFile_NotInTempDir() throws IOException {
+        Path classPath = Paths.get("src/test/resources/files/TestClass.class");
+
+        Path dexPath = Class.convertClassFilesToDex(classPath);
+        assertTrue(Files.exists(dexPath));
+    }
+
+    @Test
     void testConvertClassFilesToDex_EmptyClassFile() {
-        Path invalidClassFile = tempDir.resolve("Empty.class");
+        Path invalidClassFile = fileMap.get("Empty.class");
 
         assertThrows(RuntimeException.class, () -> {
             Class.convertClassFilesToDex(invalidClassFile);
@@ -44,7 +52,7 @@ public class ClassTest {
     }
 
     private Map<String, Path> copyAllFilesToTemp() throws IOException {
-        Path resourceDir = Paths.get("src", "test", "resources", "files");
+        Path resourceDir = Paths.get("src/test/resources/files");
         Map<String, Path> fileMap = new HashMap<>();
 
         if (Files.exists(resourceDir) && Files.isDirectory(resourceDir)) {

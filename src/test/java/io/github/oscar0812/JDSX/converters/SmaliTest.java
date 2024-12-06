@@ -165,7 +165,7 @@ public class SmaliTest {
         assertNotNull(javaDir);
         assertTrue(Files.exists(javaDir));
 
-        Path[] javaPaths = Utils.getFiles(javaDir, ".java");
+        Path[] javaPaths = FileUtils.getFiles(javaDir, ".java");
         Path javaPath = javaPaths[0];
 
         String expectedJavaCode = """
@@ -176,7 +176,7 @@ public class SmaliTest {
                 }""";
 
         String expectedNormalized = expectedJavaCode.replaceAll("\r\n|\r|\n", "\n").trim();
-        String actualNormalized = Utils.readFileToString(javaPath).replaceAll("\r\n|\r|\n", "\n").trim();
+        String actualNormalized = FileUtils.readFileToString(javaPath).replaceAll("\r\n|\r|\n", "\n").trim();
         assertEquals(expectedNormalized, actualNormalized);
     }
 
@@ -206,7 +206,7 @@ public class SmaliTest {
         assertNotNull(javaDir);
         assertTrue(Files.exists(javaDir));
 
-        Path[] javaPaths = Utils.getFiles(javaDir, ".java");
+        Path[] javaPaths = FileUtils.getFiles(javaDir, ".java");
         Path javaPath = javaPaths[0];
 
         String expectedJavaCode = """
@@ -222,7 +222,7 @@ public class SmaliTest {
                 }""";
 
         String expectedNormalized = expectedJavaCode.replaceAll("\r\n|\r|\n", "\n").trim();
-        String actualNormalized = Utils.readFileToString(javaPath).replaceAll("\r\n|\r|\n", "\n").trim();
+        String actualNormalized = FileUtils.readFileToString(javaPath).replaceAll("\r\n|\r|\n", "\n").trim();
         assertEquals(expectedNormalized, actualNormalized);
     }
 }
