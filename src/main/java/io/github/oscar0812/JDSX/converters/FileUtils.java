@@ -2,10 +2,10 @@ package io.github.oscar0812.JDSX.converters;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A utility class providing helper methods for file manipulation and validation
@@ -98,34 +98,37 @@ public class FileUtils {
      * The method returns an array of all file paths within the directory, without filtering by file extension.
      *
      * @param dirPath the directory to search for files
-     * @return an array of paths to all files in the directory
+     * @return a List of paths to all files in the directory
      * @throws IOException if an I/O error occurs while reading the directory
      */
-    public static Path[] getFiles(Path dirPath) throws IOException {
-        return getFiles(dirPath, "");
+    public static List<Path> findAllFiles(Path dirPath) throws IOException {
+        return FileUtils.findFilesByExtension(dirPath, "");
     }
 
-    /**
-     * Retrieves all files with the specified extension from the given directory.
-     * The method returns an array of file paths filtered by the provided extension (e.g., ".smali").
-     *
-     * @param dirPath the directory to search for files
-     * @param extension the file extension to filter by (e.g., ".smali")
-     * @return an array of paths to the files with the specified extension in the directory
-     * @throws IOException if an I/O error occurs while reading the directory
-     */
-    public static Path[] getFiles(Path dirPath, String extension) throws IOException {
-        List<Path> filePaths = new ArrayList<>();
+    public static List<Path> findClassFiles(Path directory, String baseName) throws IOException {
+        return findAllFiles(directory, path ->
+                path.getFileName().toString().matches(baseName + "(?:\\$.*)?\\.class"));
+    }
 
-        if (Files.isDirectory(dirPath)) {
-            // Fetch all files in the directory
-            try (var stream = Files.walk(dirPath)) {
-                stream.filter(Files::isRegularFile)
-                        .filter(file -> file.toString().endsWith(extension))
-                        .forEach(filePaths::add);
-            }
+    public static List<Path> findSmaliFiles(Path directory, String baseName) throws IOException {
+        return findAllFiles(directory, path ->
+                path.getFileName().toString().matches(".*" + baseName + "(?:\\$.*)?\\.smali"));
+    }
+
+    public static List<Path> findFilesByExtension(Path directory, String extension) throws IOException {
+        return findAllFiles(directory, path -> path.getFileName().toString().endsWith(extension));
+    }
+
+    private static List<Path> findAllFiles(Path directory, Predicate<Path> fileFilter) throws IOException {
+        List<Path> result;
+
+        try (Stream<Path> stream = Files.walk(directory)) {
+            result = stream
+                    .filter(Files::isRegularFile).filter(fileFilter)
+                    .collect(Collectors.toList());
         }
-        return filePaths.toArray(new Path[0]);
+
+        return result;
     }
 
     /**
@@ -142,7 +145,7 @@ public class FileUtils {
                 .collect(Collectors.joining(System.lineSeparator()));  // Joins lines with the system's line separator
     }
 
-    public static Path moveToTempDirIfNeeded(Path path) throws IOException {
+    public static Path copyToTempDir(Path path) throws IOException {
         Path systemTempDir = Paths.get(System.getProperty("java.io.tmpdir"));
 
         if(path.toAbsolutePath().startsWith(systemTempDir)) {

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,9 +34,9 @@ public class JavaTest {
         Path classesDir = Java.compileJavaToClass(javaFile, tempDir);
         assertNotNull(classesDir);
 
-        Path[] classFiles = FileUtils.getFiles(classesDir);
-        assertTrue(classFiles.length > 0);
-        Path classFile = classFiles[0];
+        List<Path> classFiles = FileUtils.findAllFiles(classesDir);
+        assertTrue(!classFiles.isEmpty());
+        Path classFile = classFiles.get(0);
         assertTrue(classFile.toString().endsWith(".class"));
     }
 
@@ -52,10 +53,10 @@ public class JavaTest {
         Path smaliDir = Java.convertJavaToSmali(javaCode);
         assertNotNull(smaliDir);
 
-        Path[] smaliFiles = FileUtils.getFiles(smaliDir, ".smali");
-        assertEquals(1, smaliFiles.length);
+        List<Path> smaliFiles = FileUtils.findFilesByExtension(smaliDir, ".smali");
+        assertEquals(1, smaliFiles.size());
 
-        Path smaliFile = smaliFiles[0];
+        Path smaliFile = smaliFiles.get(0);
         assertTrue(smaliFile.toString().endsWith(".smali"));
 
         String expectedSmali = """
@@ -94,10 +95,10 @@ public class JavaTest {
                 }""");
         assertNotNull(smaliDir);
 
-        Path[] smaliFiles = FileUtils.getFiles(smaliDir, ".smali");
-        assertEquals(1, smaliFiles.length);
+        List<Path> smaliFiles = FileUtils.findFilesByExtension(smaliDir, ".smali");
+        assertEquals(1, smaliFiles.size());
 
-        Path smaliFile = smaliFiles[0];
+        Path smaliFile = smaliFiles.get(0);
         assertTrue(smaliFile.toString().endsWith(".smali"));
 
         String expectedSmali = """
@@ -139,10 +140,10 @@ public class JavaTest {
                 }""");
         assertNotNull(smaliDir);
 
-        Path[] smaliFiles = FileUtils.getFiles(smaliDir, ".smali");
-        assertEquals(2, smaliFiles.length);
+        List<Path> smaliFiles = FileUtils.findFilesByExtension(smaliDir, ".smali");
+        assertEquals(2, smaliFiles.size());
 
-        Path smaliFile1 = smaliFiles[0];
+        Path smaliFile1 = smaliFiles.get(0);
         assertTrue(smaliFile1.toString().endsWith(".smali"));
 
         String expectedSmali1 = """
@@ -172,7 +173,7 @@ public class JavaTest {
         assertEquals(expectedNormalized1, actualNormalized1);
 
         // ==== the second smali
-        Path smaliFile2 = smaliFiles[1];
+        Path smaliFile2 = smaliFiles.get(1);
         assertTrue(smaliFile2.toString().endsWith(".smali"));
 
         String expectedSmali2 = """
@@ -295,9 +296,9 @@ public class JavaTest {
         Path classesDir = Java.compileJavaToClass(javaFile, tempDir);
         assertNotNull(classesDir);
 
-        Path[] classFiles = FileUtils.getFiles(classesDir);
-        assertTrue(classFiles.length > 0);
-        assertTrue(classFiles[0].toString().endsWith(".class"));
+        List<Path> classFiles = FileUtils.findAllFiles(classesDir);
+        assertFalse(classFiles.isEmpty());
+        assertTrue(classFiles.get(0).toString().endsWith(".class"));
     }
 
     @Test

@@ -23,13 +23,13 @@ public class Class {
      * @throws IOException              if an error occurs while accessing the file system
      */
     public static Path convertClassFilesToDex(Path inputPath) throws IOException {
-        inputPath = FileUtils.moveToTempDirIfNeeded(inputPath);
+        inputPath = FileUtils.copyToTempDir(inputPath);
 
-        Path[] paths;
+        List<Path> paths;
         if (Files.isRegularFile(inputPath)) {
-            paths = new Path[]{inputPath};
+            paths = List.of(inputPath);
         } else {
-            paths = FileUtils.getFiles(inputPath, ".class");
+            paths = FileUtils.findFilesByExtension(inputPath, ".class");
         }
 
         Path dexDir = Files.createDirectories(FileUtils.getSiblingDirectory(inputPath, "dex_out"));
@@ -45,12 +45,12 @@ public class Class {
             throw new RuntimeException(e);
         }
 
-        Path[] outputDexPaths = FileUtils.getFiles(dexDir, ".dex");
-        if (outputDexPaths.length == 0) {
+        List<Path> outputDexPaths = FileUtils.findFilesByExtension(dexDir, ".dex");
+        if (outputDexPaths.isEmpty()) {
             throw new IOException("Dex was not generated");
         }
 
-        return outputDexPaths[0];
+        return outputDexPaths.get(0);
     }
 
     /**

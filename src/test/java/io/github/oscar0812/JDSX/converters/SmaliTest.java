@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -165,8 +166,8 @@ public class SmaliTest {
         assertNotNull(javaDir);
         assertTrue(Files.exists(javaDir));
 
-        Path[] javaPaths = FileUtils.getFiles(javaDir, ".java");
-        Path javaPath = javaPaths[0];
+        List<Path> javaPaths = FileUtils.findFilesByExtension(javaDir, ".java");
+        Path javaPath = javaPaths.get(0);
 
         String expectedJavaCode = """
                 public class TestClass {
@@ -206,8 +207,8 @@ public class SmaliTest {
         assertNotNull(javaDir);
         assertTrue(Files.exists(javaDir));
 
-        Path[] javaPaths = FileUtils.getFiles(javaDir, ".java");
-        Path javaPath = javaPaths[0];
+        List<Path> javaPaths = FileUtils.findFilesByExtension(javaDir, ".java");
+        Path javaPath = javaPaths.get(0);
 
         String expectedJavaCode = """
                 package com.example;
